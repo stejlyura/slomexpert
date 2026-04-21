@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SLOMEXPERT - Професійний демонтаж</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@700;800;900&display=swap"
+        rel="stylesheet">
+
+    <!-- FontAwesome для іконок месенджерів -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind CSS (через CDN для генерації класів) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tire: '#16181A',
+                        orange: '#FF5A00',
+                        'orange-hover': '#E65100',
+                        concrete: '#E8ECEF',
+                        steel: '#8A949C',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Montserrat', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'brutal': '6px 6px 0px #16181A',
+                        'brutal-sm': '4px 4px 0px #16181A',
+                        'brutal-orange': '6px 6px 0px #FF5A00',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* ==============================================
+           БАЗОВІ СТИЛІ
+           ============================================== */
+        body {
+            background-color: #E8ECEF;
+            color: #16181A;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        .font-heading {
+            font-family: 'Montserrat', sans-serif;
+            text-transform: uppercase;
+        }
+
+        /* Брутальні елементи */
+        .btn-brutal {
+            border: 3px solid #16181A;
+            box-shadow: 6px 6px 0px #16181A;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+        }
+
+        .btn-brutal:active {
+            transform: translate(6px, 6px);
+            box-shadow: 0px 0px 0px #16181A;
+        }
+
+        .card-brutal {
+            border: 3px solid #16181A;
+            box-shadow: 8px 8px 0px #16181A;
+            background: #ffffff;
+        }
+
+        /* ==============================================
+           CSS-ONLY МОБІЛЬНЕ МЕНЮ (Через Checkbox)
+           ============================================== */
+        #mobile-menu-content {
+            display: none;
+        }
+
+        #mobile-menu-toggle:checked~#mobile-menu-content {
+            display: flex;
+        }
+
+        #mobile-menu-toggle:checked~header .menu-icon-bars {
+            display: none;
+        }
+
+        #mobile-menu-toggle:checked~header .menu-icon-close {
+            display: block;
+        }
+
+        .menu-icon-close {
+            display: none;
+        }
+
+        /* ==============================================
+           CSS-ONLY КАРУСЕЛЬ (Через Radio Buttons)
+           ============================================== */
+        .nav-btn {
+            display: none;
+            cursor: pointer;
+        }
+
+        /* Логіка перемикання кнопок навігації в залежності від активного слайду */
+        #s1:checked~.arrows .s1-prev,
+        #s1:checked~.arrows .s1-next {
+            display: flex;
+        }
+
+        #s2:checked~.arrows .s2-prev,
+        #s2:checked~.arrows .s2-next {
+            display: flex;
+        }
+
+        #s3:checked~.arrows .s3-prev,
+        #s3:checked~.arrows .s3-next {
+            display: flex;
+        }
+
+        /* Логіка зміщення треку каруселі */
+        #s1:checked~.carousel-viewport .carousel-track {
+            transform: translateX(0%);
+        }
+
+        #s2:checked~.carousel-viewport .carousel-track {
+            transform: translateX(-100%);
+        }
+
+        #s3:checked~.carousel-viewport .carousel-track {
+            transform: translateX(-200%);
+        }
+    </style>
+</head>
+
+<body class="antialiased selection:bg-orange selection:text-white relative">
+
+    <!-- CSS Стейт для мобільного меню -->
+    <input type="checkbox" id="mobile-menu-toggle" class="hidden">
+
+    <!-- 1. Хедер -->
+    <header class="bg-white border-b-4 border-tire sticky top-0 z-50 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center gap-2">
+                    <span class="text-4xl">🏗️</span>
+                    <span class="font-heading font-black text-2xl tracking-tighter">SLOM<span
+                            class="text-orange">EXPERT</span></span>
+                </div>
+
+                <!-- Десктопне меню -->
+                <nav class="hidden md:flex gap-8 font-semibold">
+                    <a href="#experience" class="hover:text-orange transition-colors">Про нас</a>
+                    <a href="#services" class="hover:text-orange transition-colors">Послуги</a>
+                    <a href="#calculator" class="hover:text-orange transition-colors">Конфігуратор</a>
+                </nav>
+
+                <div class="hidden sm:block">
+                    <a href="#contact1"
+                        class="btn-brutal bg-orange text-white font-heading font-bold py-3 px-6 text-sm hover:bg-orange-hover">
+                        Замовити дзвінок
+                    </a>
+                </div>
+
+                <!-- Кнопка мобільного меню (CSS-only) -->
+                <label for="mobile-menu-toggle" class="md:hidden text-3xl cursor-pointer text-tire p-2">
+                    <i class="fa-solid fa-bars menu-icon-bars"></i>
+                    <i class="fa-solid fa-xmark menu-icon-close"></i>
+                </label>
+            </div>
+        </div>
+    </header>
+
+    <!-- Випадаюче мобільне меню (CSS-only) -->
+    <nav id="mobile-menu-content"
+        class="bg-tire text-white flex-col font-heading font-bold text-xl border-b-4 border-orange sticky top-20 z-40">
+        <a href="#experience" class="p-4 border-b border-gray-700 hover:bg-gray-800"><label for="mobile-menu-toggle"
+                class="cursor-pointer w-full block">Про нас</label></a>
+        <a href="#services" class="p-4 border-b border-gray-700 hover:bg-gray-800"><label for="mobile-menu-toggle"
+                class="cursor-pointer w-full block">Послуги</label></a>
+        <a href="#calculator" class="p-4 border-b border-gray-700 hover:bg-gray-800"><label for="mobile-menu-toggle"
+                class="cursor-pointer w-full block">Конфігуратор</label></a>
+        <a href="#contact1" class="p-4 bg-orange text-center"><label for="mobile-menu-toggle"
+                class="cursor-pointer w-full block">Замовити дзвінок</label></a>
+    </nav>
+
+    <!-- 2. Карусель / Hero блок (CSS-ONLY) -->
+    <section class="bg-tire text-white py-12 md:py-20 border-b-4 border-tire relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center mb-10">
+                <h1 class="font-heading font-black text-4xl md:text-6xl mb-4 leading-tight">
+                    БРУТАЛЬНИЙ ДЕМОНТАЖ <br> <span class="text-orange border-b-4 border-orange">БЕЗ ЗАЙВОГО БРУДУ</span>
+                </h1>
+                <p class="text-steel md:text-xl max-w-2xl mx-auto">Зносимо, ламаємо та розчищаємо будь-які об'єкти в
+                    Україні. Швидко. Надійно. Під ключ.</p>
+            </div>
+
+            <!-- CSS-ONLY СЛАЙДЕР -->
+            <div class="relative max-w-4xl mx-auto border-4 border-orange bg-tire">
+
+                <!-- Скриті радіо-кнопки для керування станом -->
+                <input type="radio" name="slider" id="s1" checked class="hidden">
+                <input type="radio" name="slider" id="s2" class="hidden">
+                <input type="radio" name="slider" id="s3" class="hidden">
+
+                <!-- Вікно перегляду -->
+                <div class="carousel-viewport w-full overflow-hidden relative">
+                    <!-- Трек зі слайдами -->
+                    <div class="carousel-track flex transition-transform duration-500 ease-in-out w-full">
+
+                        <!-- ТУТ ПОВИННІ БУТИ РЕАЛЬНІ ФОТОГРАФІЇ РОБІТ. 
+                             Замість вмісту div'ів вставте тег <img> -->
+
+                        <!-- Слайд 1 -->
+                        <div
+                            class="w-full flex-shrink-0 flex flex-col items-center justify-center bg-concrete text-tire h-[300px] md:h-[450px]">
+                            <span class="text-6xl md:text-8xl mb-4">🏢💥</span>
+                            <h3 class="font-heading font-bold text-2xl">Знесення будівель</h3>
+                            <p class="text-sm font-mono mt-2 opacity-50">[Тут буде фото об'єкта]</p>
+                        </div>
+
+                        <!-- Слайд 2 -->
+                        <div
+                            class="w-full flex-shrink-0 flex flex-col items-center justify-center bg-gray-300 text-tire h-[300px] md:h-[450px]">
+                            <span class="text-6xl md:text-8xl mb-4">🚜</span>
+                            <h3 class="font-heading font-bold text-2xl">Механізований демонтаж</h3>
+                            <p class="text-sm font-mono mt-2 opacity-50">[Тут буде фото екскаватора]</p>
+                        </div>
+
+                        <!-- Слайд 3 -->
+                        <div
+                            class="w-full flex-shrink-0 flex flex-col items-center justify-center bg-gray-400 text-tire h-[300px] md:h-[450px]">
+                            <span class="text-6xl md:text-8xl mb-4">🔨</span>
+                            <h3 class="font-heading font-bold text-2xl">Ручний демонтаж квартир</h3>
+                            <p class="text-sm font-mono mt-2 opacity-50">[Тут буде фото робітників]</p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Контролери (Стрілки) -->
+                <div class="arrows absolute inset-0 pointer-events-none">
+                    <!-- Стрілки для 1 слайду (Сюди показує коли s1 активний) -->
+                    <label for="s3"
+                        class="nav-btn s1-prev absolute left-0 top-1/2 -translate-y-1/2 bg-orange text-white w-12 h-12 items-center justify-center border-r-4 border-y-4 border-tire hover:bg-orange-hover text-2xl pointer-events-auto transition-colors"><i
+                            class="fa-solid fa-chevron-left"></i></label>
+                    <label for="s2"
+                        class="nav-btn s1-next absolute right-0 top-1/2 -translate-y-1/2 bg-orange text-white w-12 h-12 items-center justify-center border-l-4 border-y-4 border-tire hover:bg-orange-hover text-2xl pointer-events-auto transition-colors"><i
+                            class="fa-solid fa-chevron-right"></i></label>
+
+                    <!-- Стрілки для 2 слайду -->
+                    <label for="s1"
+                        class="nav-btn s2-prev absolute left-0 top-1/2 -translate-y-1/2 bg-orange text-white w-12 h-12 items-center justify-center border-r-4 border-y-4 border-tire hover:bg-orange-hover text-2xl pointer-events-auto transition-colors"><i
+                            class="fa-solid fa-chevron-left"></i></label>
+                    <label for="s3"
+                        class="nav-btn s2-next absolute right-0 top-1/2 -translate-y-1/2 bg-orange text-white w-12 h-12 items-center justify-center border-l-4 border-y-4 border-tire hover:bg-orange-hover text-2xl pointer-events-auto transition-colors"><i
+                            class="fa-solid fa-chevron-right"></i></label>
+
+                    <!-- Стрілки для 3 слайду -->
+                    <label for="s2"
+                        class="nav-btn s3-prev absolute left-0 top-1/2 -translate-y-1/2 bg-orange text-white w-12 h-12 items-center justify-center border-r-4 border-y-4 border-tire hover:bg-orange-hover text-2xl pointer-events-auto transition-colors"><i
+                            class="fa-solid fa-chevron-left"></i></label>
+                    <label for="s1"
+                        class="nav-btn s3-next absolute right-0 top-1/2 -translate-y-1/2 bg-orange text-white w-12 h-12 items-center justify-center border-l-4 border-y-4 border-tire hover:bg-orange-hover text-2xl pointer-events-auto transition-colors"><i
+                            class="fa-solid fa-chevron-right"></i></label>
+                </div>
+
+            </div>
+        </div>
+        <!-- Декоративна сітка на фоні -->
+        <div
+            class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAwIDEwIEwgNDAgMTAgTSAxMCAwIEwgMTAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjA1KSIgc3Ryb2tlLXdpZHRoPSIyIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-50 z-0">
+        </div>
+    </section>
+
+    <!-- 3. Форма зв'язку 1 -->
+    <section id="contact1" class="py-16 px-4">
+        <div class="max-w-4xl mx-auto card-brutal p-8 md:p-12">
+            <h2 class="font-heading font-black text-3xl md:text-4xl mb-2">Швидка оцінка об'єкта</h2>
+            <p class="text-steel mb-8">Залишіть заявку, і наш спеціаліст зв'яжеться з вами протягом 15 хвилин.</p>
+
+            <form action="#contact1" class="flex flex-col md:flex-row gap-4">
+                <input type="text" placeholder="Ваше ім'я" required
+                    class="flex-1 bg-concrete border-4 border-tire p-4 font-semibold outline-none focus:border-orange transition-colors placeholder:text-steel">
+                <input type="tel" placeholder="+38 (0__) ___-__-__" required
+                    class="flex-1 bg-concrete border-4 border-tire p-4 font-semibold outline-none focus:border-orange transition-colors placeholder:text-steel">
+                <button type="submit"
+                    class="btn-brutal bg-orange text-white font-heading font-bold px-8 py-4 text-lg hover:bg-orange-hover">
+                    ВИКЛИКАТИ МАЙСТРА
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <!-- 4. Наш досвід -->
+    <section id="experience" class="py-16 bg-tire text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="font-heading font-black text-4xl mb-12 text-center">НАШ ДОСВІД В ЦИФРАХ</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <!-- Стат 1 -->
+                <div class="border-4 border-orange p-6 text-center bg-tire/50 relative overflow-hidden group">
+                    <div class="relative z-10">
+                        <div class="text-5xl font-heading font-black text-orange mb-2">> 10</div>
+                        <div class="font-bold text-lg">Років на ринку</div>
+                    </div>
+                </div>
+                <!-- Стат 2 -->
+                <div class="border-4 border-orange p-6 text-center bg-tire/50">
+                    <div class="text-5xl font-heading font-black text-orange mb-2">500+</div>
+                    <div class="font-bold text-lg">Успішних об'єктів</div>
+                </div>
+                <!-- Стат 3 -->
+                <div class="border-4 border-orange p-6 text-center bg-tire/50">
+                    <div class="text-5xl font-heading font-black text-orange mb-2">24/7</div>
+                    <div class="font-bold text-lg">Графік роботи</div>
+                </div>
+                <!-- Стат 4 -->
+                <div class="border-4 border-orange p-6 text-center bg-tire/50">
+                    <div class="text-5xl font-heading font-black text-orange mb-2">15</div>
+                    <div class="font-bold text-lg">Одиниць техніки</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. Порівняння з конкурентами -->
+    <section class="py-20 px-4 max-w-7xl mx-auto">
+        <h2 class="font-heading font-black text-4xl text-center mb-12">ЧОМУ МИ, А НЕ "ШАБАШНИКИ"?</h2>
+
+        <div class="flex flex-col md:flex-row gap-8">
+            <!-- Погані хлопці (Сіре, нудне) -->
+            <div class="flex-1 bg-concrete border-4 border-steel border-dashed p-8 opacity-80">
+                <div class="flex items-center gap-3 mb-6 pb-4 border-b-2 border-steel">
+                    <i class="fa-solid fa-face-frown text-3xl text-steel"></i>
+                    <h3 class="font-heading font-bold text-2xl text-steel">Типові конкуренти</h3>
+                </div>
+                <ul class="space-y-4 font-semibold text-gray-500 line-through decoration-red-500/50 decoration-2">
+                    <li class="flex items-start gap-2"><i class="fa-solid fa-xmark mt-1 text-red-500"></i> Ціна зростає
+                        під час роботи</li>
+                    <li class="flex items-start gap-2"><i class="fa-solid fa-xmark mt-1 text-red-500"></i> Залишають
+                        гори будівельного сміття</li>
+                    <li class="flex items-start gap-2"><i class="fa-solid fa-xmark mt-1 text-red-500"></i> Зривають
+                        терміни здачі</li>
+                    <li class="flex items-start gap-2"><i class="fa-solid fa-xmark mt-1 text-red-500"></i> Працюють "в
+                        чорну" без гарантій</li>
+                </ul>
+            </div>
+
+            <!-- Ми (Яскраве, брутальне) -->
+            <div class="flex-1 card-brutal border-orange p-8 relative">
+                <div
+                    class="absolute -top-4 -right-4 bg-orange text-white font-heading font-black px-4 py-2 transform rotate-6 border-2 border-tire">
+                    НАШ ПІДХІД
+                </div>
+                <div class="flex items-center gap-3 mb-6 pb-4 border-b-4 border-tire">
+                    <span class="text-3xl">👷‍♂️</span>
+                    <h3 class="font-heading font-black text-2xl text-tire">SLOMEXPERT</h3>
+                </div>
+                <ul class="space-y-4 font-bold text-tire text-lg">
+                    <li class="flex items-start gap-3"><i class="fa-solid fa-check text-orange text-xl mt-1"></i>
+                        Фіксована ціна в договорі перед стартом</li>
+                    <li class="flex items-start gap-3"><i class="fa-solid fa-check text-orange text-xl mt-1"></i> Повний
+                        вивіз сміття та прибирання об'єкта</li>
+                    <li class="flex items-start gap-3"><i class="fa-solid fa-check text-orange text-xl mt-1"></i> Чітке
+                        дотримання дедлайнів. Штрафи за затримку</li>
+                    <li class="flex items-start gap-3"><i class="fa-solid fa-check text-orange text-xl mt-1"></i> Всі
+                        дозвільні документи та гарантія безпеки</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Додатковий блок 1: Послуги -->
+    <section id="services" class="py-16 bg-white border-y-4 border-tire">
+        <div class="max-w-7xl mx-auto px-4">
+            <h2 class="font-heading font-black text-4xl mb-12 text-center uppercase">Що ми демонтуємо?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div
+                    class="p-6 border-4 border-tire hover:-translate-y-2 transition-transform shadow-brutal-sm bg-white">
+                    <div class="text-4xl mb-4">🏭</div>
+                    <h4 class="font-heading font-bold text-xl mb-2">Промислові об'єкти</h4>
+                    <p class="text-steel font-medium">Ангари, заводи, цехи. Тяжка техніка та різання металоконструкцій.
+                    </p>
+                </div>
+                <div
+                    class="p-6 border-4 border-tire hover:-translate-y-2 transition-transform shadow-brutal-sm bg-orange text-white">
+                    <div class="text-4xl mb-4">🏠</div>
+                    <h4 class="font-heading font-bold text-xl mb-2">Приватні будинки</h4>
+                    <p class="font-medium">Акуратне знесення старих будинків, дач, сараїв зі збереженням матеріалів.</p>
+                </div>
+                <div
+                    class="p-6 border-4 border-tire hover:-translate-y-2 transition-transform shadow-brutal-sm bg-white">
+                    <div class="text-4xl mb-4">🚪</div>
+                    <h4 class="font-heading font-bold text-xl mb-2">Квартирний демонтаж</h4>
+                    <p class="text-steel font-medium">Стяжка, перегородки, плитка. Працюємо тихо (наскільки це можливо).
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 7. Конфігуратор робіт (CSS-only) -->
+    <section id="calculator" class="py-20 px-4 bg-tire relative overflow-hidden">
+        <div class="absolute inset-0 z-0 opacity-10"
+            style="background: repeating-linear-gradient(45deg, #FF5A00, #FF5A00 40px, #16181A 40px, #16181A 80px);">
+        </div>
+
+        <div class="max-w-3xl mx-auto card-brutal border-orange p-8 md:p-12 relative z-10 bg-white">
+            <h2 class="font-heading font-black text-3xl mb-6 uppercase text-center">Конфігуратор робіт</h2>
+            <p class="text-center font-semibold mb-8 text-steel">Виберіть параметри вашого об'єкта для попереднього
+                розрахунку</p>
+
+            <form action="#calculator" class="space-y-6">
+                <!-- Плейсхолдер 1: Тип об'єкта -->
+                <div>
+                    <label class="block font-bold mb-2 uppercase text-sm">Тип об'єкта</label>
+                    <select
+                        class="w-full bg-concrete border-4 border-tire p-4 font-semibold outline-none focus:border-orange cursor-pointer appearance-none">
+                        <option value="">[ Оберіть тип демонтажу ]</option>
+                        <option value="house">Приватний будинок</option>
+                        <option value="flat">Квартира (перегородки/підлога)</option>
+                        <option value="commercial">Комерційне приміщення</option>
+                        <option value="metal">Металоконструкції</option>
+                    </select>
+                </div>
+
+                <!-- Плейсхолдер 2: Матеріал (CSS Radio Buttons) -->
+                <div>
+                    <label class="block font-bold mb-2 uppercase text-sm">Основний матеріал</label>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <label
+                            class="border-2 border-tire p-3 text-center cursor-pointer hover:bg-orange hover:text-white transition-colors font-bold flex items-center justify-center gap-2 has-[:checked]:bg-tire has-[:checked]:text-white">
+                            <input type="radio" name="material" class="hidden"> Цегла
+                        </label>
+                        <label
+                            class="border-2 border-tire p-3 text-center cursor-pointer hover:bg-orange hover:text-white transition-colors font-bold flex items-center justify-center gap-2 has-[:checked]:bg-tire has-[:checked]:text-white">
+                            <input type="radio" name="material" checked class="hidden"> Бетон
+                        </label>
+                        <label
+                            class="border-2 border-tire p-3 text-center cursor-pointer hover:bg-orange hover:text-white transition-colors font-bold flex items-center justify-center gap-2 has-[:checked]:bg-tire has-[:checked]:text-white">
+                            <input type="radio" name="material" class="hidden"> Дерево
+                        </label>
+                        <label
+                            class="border-2 border-tire p-3 text-center cursor-pointer hover:bg-orange hover:text-white transition-colors font-bold flex items-center justify-center gap-2 has-[:checked]:bg-tire has-[:checked]:text-white">
+                            <input type="radio" name="material" class="hidden"> Метал
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Плейсхолдер 3: Додаткові послуги -->
+                <div>
+                    <label class="block font-bold mb-2 uppercase text-sm">Додаткові послуги (опціонально)</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-3 font-semibold cursor-pointer">
+                            <input type="checkbox" checked class="w-5 h-5 accent-orange border-2 border-tire">
+                            Вивіз будівельного сміття (Надаємо свої КАМАЗи)
+                        </label>
+                        <label class="flex items-center gap-3 font-semibold cursor-pointer">
+                            <input type="checkbox" class="w-5 h-5 accent-orange border-2 border-tire">
+                            Збереження цілісних матеріалів (цегла, балки)
+                        </label>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t-4 border-tire text-center">
+                    <button type="submit"
+                        class="btn-brutal bg-tire text-orange w-full md:w-auto font-heading font-black text-xl px-12 py-5 hover:bg-orange hover:text-tire border-orange">
+                        ЗАМОВИТИ АУДИТ ТА ПРОРАХУНОК
+                    </button>
+                    <p class="text-sm font-semibold text-steel mt-4">*Аудит безкоштовний і ні до чого вас не зобов'язує
+                    </p>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- Додатковий блок 2: Як ми працюємо -->
+    <section class="py-16 bg-concrete">
+        <div class="max-w-7xl mx-auto px-4">
+            <h2 class="font-heading font-black text-4xl mb-12 text-center">ЯК МИ ПРАЦЮЄМО</h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-8 relative">
+                <!-- Лінія між кроками (тільки десктоп) -->
+                <div class="hidden md:block absolute top-1/2 left-0 w-full h-2 bg-tire -translate-y-1/2 z-0"></div>
+
+                <div class="bg-white border-4 border-tire p-6 relative z-10 text-center shadow-brutal-sm">
+                    <div
+                        class="w-12 h-12 bg-orange text-white font-heading font-black text-2xl flex items-center justify-center border-2 border-tire mx-auto mb-4 rounded-full">
+                        1</div>
+                    <h4 class="font-bold text-lg mb-2">Заявка</h4>
+                    <p class="text-sm font-medium">Ви телефонуєте або залишаєте заявку на сайті.</p>
+                </div>
+                <div class="bg-white border-4 border-tire p-6 relative z-10 text-center shadow-brutal-sm">
+                    <div
+                        class="w-12 h-12 bg-orange text-white font-heading font-black text-2xl flex items-center justify-center border-2 border-tire mx-auto mb-4 rounded-full">
+                        2</div>
+                    <h4 class="font-bold text-lg mb-2">Оцінка</h4>
+                    <p class="text-sm font-medium">Майстер виїжджає на об'єкт, складає кошторис.</p>
+                </div>
+                <div class="bg-white border-4 border-tire p-6 relative z-10 text-center shadow-brutal-sm">
+                    <div
+                        class="w-12 h-12 bg-orange text-white font-heading font-black text-2xl flex items-center justify-center border-2 border-tire mx-auto mb-4 rounded-full">
+                        3</div>
+                    <h4 class="font-bold text-lg mb-2">Демонтаж</h4>
+                    <p class="text-sm font-medium">Заганяємо техніку, швидко та акуратно ламаємо.</p>
+                </div>
+                <div
+                    class="bg-tire text-white border-4 border-orange p-6 relative z-10 text-center shadow-brutal-orange">
+                    <div
+                        class="w-12 h-12 bg-white text-orange font-heading font-black text-2xl flex items-center justify-center border-2 border-orange mx-auto mb-4 rounded-full">
+                        4</div>
+                    <h4 class="font-bold text-lg mb-2">Чистота</h4>
+                    <p class="text-sm font-medium">Вивозимо сміття, ви приймаєте чистий майданчик.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6 & 8. Форма зв'язку 2 + Месенджери -->
+    <section class="py-20 bg-orange border-b-8 border-tire">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row gap-12 items-center">
+
+            <div class="flex-1 text-tire">
+                <h2 class="font-heading font-black text-4xl md:text-5xl mb-6 leading-none">ГОТОВІ ДО <br> ДЕМОНТАЖУ?
+                </h2>
+                <p class="text-xl font-bold mb-8">Пишіть нам туди, де вам зручно. Ми завжди онлайн.</p>
+
+                <!-- Блок месенджерів -->
+                <div class="flex flex-wrap gap-4 mb-8">
+                    <a href="#"
+                        class="btn-brutal bg-white w-16 h-16 flex items-center justify-center text-3xl text-[#0088cc] hover:bg-gray-100"
+                        title="Telegram">
+                        <i class="fa-brands fa-telegram"></i>
+                    </a>
+                    <a href="#"
+                        class="btn-brutal bg-white w-16 h-16 flex items-center justify-center text-3xl text-[#7360f2] hover:bg-gray-100"
+                        title="Viber">
+                        <i class="fa-brands fa-viber"></i>
+                    </a>
+                    <a href="#"
+                        class="btn-brutal bg-white w-16 h-16 flex items-center justify-center text-3xl text-[#25D366] hover:bg-gray-100"
+                        title="WhatsApp">
+                        <i class="fa-brands fa-whatsapp"></i>
+                    </a>
+                    <a href="#"
+                        class="btn-brutal bg-white w-16 h-16 flex items-center justify-center text-3xl text-[#3A76F0] hover:bg-gray-100"
+                        title="Signal">
+                        <i class="fa-solid fa-comment-dots"></i>
+                    </a>
+                </div>
+
+                <div
+                    class="font-heading font-black text-3xl bg-tire text-white inline-block px-6 py-3 border-4 border-tire shadow-brutal-sm">
+                    +38 (067) 215-88-88
+                </div>
+            </div>
+
+            <div class="flex-1 w-full">
+                <form action="#contact2" class="card-brutal p-8 bg-white flex flex-col gap-6" id="contact2">
+                    <h3 class="font-heading font-bold text-2xl mb-2">Або замовте зворотний дзвінок</h3>
+                    <input type="text" placeholder="Як до вас звертатись?" required
+                        class="bg-concrete border-4 border-tire p-4 font-bold outline-none focus:border-orange">
+                    <input type="tel" placeholder="Ваш номер телефону" required
+                        class="bg-concrete border-4 border-tire p-4 font-bold outline-none focus:border-orange">
+                    <button type="submit"
+                        class="btn-brutal bg-tire text-white font-heading font-bold px-8 py-5 text-xl hover:bg-gray-800">
+                        ЧЕКАЮ ДЗВІНКА
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 10. Футер -->
+    <footer class="bg-tire text-steel py-12 text-center md:text-left border-t-4 border-orange">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div>
+                <div class="font-heading font-black text-2xl text-white mb-2">SLOM<span
+                        class="text-orange">EXPERT</span></div>
+                <p class="font-medium text-sm">Професійні демонтажні роботи по всій території України.<br>Без вихідних
+                    та свят.</p>
+            </div>
+            <div class="font-bold text-sm">
+                <p class="mb-1">м. Київ, вул. Будівельна, 10</p>
+                <p>Email: info@slomexpert.ua</p>
+            </div>
+            <div class="text-xs opacity-60 font-semibold">
+                &copy; 2026 Slomexpert. Всі права захищено.<br>
+                Розроблено брутально та з любов'ю. Без JS.
+            </div>
+        </div>
+    </footer>
+
+</body>
+
+</html>
