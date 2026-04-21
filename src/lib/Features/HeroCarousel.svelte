@@ -1,21 +1,23 @@
 <script>
-    export let slides = [
-        {
-            title: "Знесення будівель",
-            emoji: "🏢💥",
-            bg: "var(--color-concrete)"
-        },
-        {
-            title: "Механізований демонтаж",
-            emoji: "🚜",
-            bg: "#D1D5DB" /* gray-300 */
-        },
-        {
-            title: "Ручний демонтаж квартир",
-            emoji: "🔨",
-            bg: "#9CA3AF" /* gray-400 */
-        }
-    ];
+    let {
+        slides = [
+            {
+                title: "Знесення будівель",
+                emoji: "🏢💥",
+                bg: "var(--color-concrete)"
+            },
+            {
+                title: "Механізований демонтаж",
+                emoji: "🚜",
+                bg: "#D1D5DB" /* gray-300 */
+            },
+            {
+                title: "Ручний демонтаж квартир",
+                emoji: "🔨",
+                bg: "#9CA3AF" /* gray-400 */
+            }
+        ]
+    } = $props();
 </script>
 
 <div class="carousel-container">

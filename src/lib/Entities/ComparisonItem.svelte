@@ -1,6 +1,5 @@
 <script>
-    export let text = "";
-    export let type = "positive"; // "positive" or "negative"
+    let { text = "", type = "positive" } = $props();
 </script>
 
 <li class="comparison-item {type}">

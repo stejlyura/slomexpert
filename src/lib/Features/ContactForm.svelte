@@ -2,13 +2,15 @@
     import Input from '../shared/ui/Input.svelte';
     import Button from '../shared/ui/Button.svelte';
 
-    export let title = "Швидка оцінка об'єкта";
-    export let description = "Залишіть заявку, і наш спеціаліст зв'яжеться з вами протягом 15 хвилин.";
-    export let buttonText = "ВИКЛИКАТИ МАЙСТРА";
-    export let id = "contact-form";
+    let {
+        title = "Швидка оцінка об'єкта",
+        description = "Залишіть заявку, і наш спеціаліст зв'яжеться з вами протягом 15 хвилин.",
+        buttonText = "ВИКЛИКАТИ МАЙСТРА",
+        id = "contact-form"
+    } = $props();
 
-    let name = "";
-    let phone = "";
+    let name = $state("");
+    let phone = $state("");
 
     function handleSubmit() {
         console.log("Form submitted:", { name, phone });
@@ -20,7 +22,7 @@
     <h2 class="title">{title}</h2>
     <p class="description">{description}</p>
 
-    <form on:submit|preventDefault={handleSubmit} class="form-layout">
+    <form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }} class="form-layout">
         <Input 
             bind:value={name} 
             placeholder="Ваше ім'я" 

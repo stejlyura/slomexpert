@@ -1,8 +1,10 @@
 <script>
-    export let number = 1;
-    export let title = "";
-    export let description = "";
-    export let variant = "white"; // "white" or "tire"
+    let {
+        number = 1,
+        title = "",
+        description = "",
+        variant = "white"
+    } = $props();
 </script>
 
 <div class="step-card {variant} shadow-brutal-sm">

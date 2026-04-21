@@ -1,29 +1,40 @@
-<script>
-    export let value = "";
-    export let options = []; // Array of { value, label }
-    export let placeholder = "";
-    export let className = "";
-    export let name = "";
-    export let id = "";
-    export let required = false;
+<script lang="ts">
+    // Описуємо структуру для опцій
+    export interface SelectOption {
+        value: string | number;
+        label: string;
+    }
+
+    // Дозволяємо value бути або рядком, або числом
+    let {
+        value = $bindable(""),
+        options = [],
+        placeholder = "",
+        className = "",
+        name = "",
+        id = "",
+        required = false,
+        ...rest
+    }: {
+        value?: string | number;
+        options?: SelectOption[];
+        placeholder?: string;
+        className?: string;
+        name?: string;
+        id?: string;
+        required?: boolean;
+        [key: string]: any;
+    } = $props();
 </script>
 
 <div class="select-wrapper {className}">
-    <select 
-        {id}
-        {name}
-        {required}
-        bind:value
-        class="select-brutal"
-        on:change
-    >
+    <select {id} {name} {required} bind:value class="select-brutal" {...rest}>
         {#if placeholder}
             <option value="" disabled selected hidden>{placeholder}</option>
         {/if}
         {#each options as option}
             <option value={option.value}>{option.label}</option>
         {/each}
-        <slot />
     </select>
     <div class="select-arrow">
         <i class="fa-solid fa-chevron-down"></i>
@@ -47,7 +58,9 @@
         outline: none;
         cursor: pointer;
         appearance: none;
-        transition: border-color var(--transition-base), box-shadow var(--transition-base);
+        transition:
+            border-color var(--transition-base),
+            box-shadow var(--transition-base);
     }
 
     .select-brutal:focus {

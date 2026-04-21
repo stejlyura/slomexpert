@@ -1,5 +1,5 @@
 <script>
-    export let year = new Date().getFullYear();
+    let { year = new Date().getFullYear() } = $props();
 </script>
 
 <footer class="footer">

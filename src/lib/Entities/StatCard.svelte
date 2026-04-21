@@ -1,6 +1,5 @@
 <script>
-    export let value = "";
-    export let label = "";
+    let { value = "", label = "" } = $props();
 </script>
 
 <div class="stat-card">

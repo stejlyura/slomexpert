@@ -1,40 +1,48 @@
-<script>
-    import Button from '../shared/ui/Button.svelte';
+<script lang="ts">
+    import Button from "../shared/ui/Button.svelte";
 
-    export let links = [
-        { href: '#experience', label: 'Про нас' },
-        { href: '#services', label: 'Послуги' },
-        { href: '#calculator', label: 'Конфігуратор' }
-    ];
+    export interface NavLink {
+        href: string;
+        label: string;
+    }
+
+    let {
+        links = [
+            { href: "#experience", label: "Про нас" },
+            { href: "#services", label: "Послуги" },
+            { href: "#calculator", label: "Конфігуратор" },
+        ],
+    }: { links?: NavLink[] } = $props();
 </script>
 
-<!-- CSS State for mobile menu -->
-<input type="checkbox" id="mobile-menu-toggle" class="hidden-toggle">
+<input type="checkbox" id="mobile-menu-toggle" class="hidden-toggle" />
 
 <header class="header">
     <div class="container">
         <div class="header-inner">
-            <!-- Logo -->
             <a href="/" class="logo">
                 <span class="logo-emoji">🏗️</span>
-                <span class="logo-text">SLOM<span class="text-orange">EXPERT</span></span>
+                <span class="logo-text"
+                    >SLOM<span class="text-orange">EXPERT</span></span
+                >
             </a>
 
-            <!-- Desktop Nav -->
             <nav class="desktop-nav">
                 {#each links as link}
                     <a href={link.href} class="nav-link">{link.label}</a>
                 {/each}
             </nav>
 
-            <!-- CTA Button -->
             <div class="header-cta">
-                <Button href="#contact1" variant="orange" className="px-6 py-3 text-sm">
+                <Button
+                    href="#contact1"
+                    variant="orange"
+                    className="px-6 py-3 text-sm"
+                >
                     Замовити дзвінок
                 </Button>
             </div>
 
-            <!-- Mobile Menu Toggle -->
             <label for="mobile-menu-toggle" class="mobile-toggle-btn">
                 <i class="fa-solid fa-bars menu-icon-bars"></i>
                 <i class="fa-solid fa-xmark menu-icon-close"></i>
@@ -43,7 +51,6 @@
     </div>
 </header>
 
-<!-- Mobile Dropdown Menu -->
 <nav id="mobile-menu-content" class="mobile-nav">
     {#each links as link}
         <a href={link.href} class="mobile-nav-link">

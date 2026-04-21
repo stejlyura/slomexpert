@@ -1,11 +1,14 @@
 <script>
-    export let value = "";
-    export let type = "text";
-    export let placeholder = "";
-    export let required = false;
-    export let className = "";
-    export let name = "";
-    export let id = "";
+    let {
+        value = $bindable(""),
+        type = "text",
+        placeholder = "",
+        required = false,
+        className = "",
+        name = "",
+        id = "",
+        ...rest
+    } = $props();
 </script>
 
 <input 
@@ -16,10 +19,7 @@
     {required}
     bind:value
     class="input-brutal {className}"
-    on:input
-    on:change
-    on:blur
-    on:focus
+    {...rest}
 />
 
 <style>

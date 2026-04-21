@@ -1,24 +1,54 @@
-<script>
-    export let type = "checkbox"; // "checkbox" or "radio"
-    export let name = "";
-    export let value = "";
-    export let checked = false;
-    export let label = "";
-    export let className = "";
-    export let id = "";
+<script lang="ts">
+    // Описуємо всі пропси, які очікує компонент
+    interface Props {
+        type?: "checkbox" | "radio";
+        name?: string;
+        value?: string | number;
+        checked?: boolean;
+        group?: any;
+        label?: string;
+        className?: string;
+        id?: string;
+        [key: string]: any; // Дозволяє передавати будь-які інші HTML-атрибути (...rest)
+    }
+
+    let {
+        type = "checkbox",
+        name = "",
+        value = "",
+        checked = $bindable(false),
+        group = $bindable(undefined),
+        label = "",
+        className = "",
+        id = "",
+        children,
+        ...rest
+    }: Props = $props();
 </script>
 
 <label class="toggle-brutal {className} {checked ? 'is-checked' : ''}" for={id}>
-    <input 
-        {id}
-        {type}
-        {name}
-        {value}
-        bind:checked
-        class="hidden"
-        on:change
-    />
-    <slot>{label}</slot>
+    {#if type === "radio"}
+        <input
+            {id}
+            type="radio"
+            {name}
+            {value}
+            bind:group
+            class="hidden"
+            {...rest}
+        />
+    {:else}
+        <input
+            {id}
+            type="checkbox"
+            {name}
+            {value}
+            bind:checked
+            class="hidden"
+            {...rest}
+        />
+    {/if}
+    {@render children?.()}{label}
 </label>
 
 <style>

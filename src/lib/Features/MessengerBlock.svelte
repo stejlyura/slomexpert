@@ -1,11 +1,13 @@
 <script>
-    export let messengers = [
-        { name: 'Telegram', icon: 'fa-brands fa-telegram', color: '#0088cc', href: '#' },
-        { name: 'Viber', icon: 'fa-brands fa-viber', color: '#7360f2', href: '#' },
-        { name: 'WhatsApp', icon: 'fa-brands fa-whatsapp', color: '#25D366', href: '#' },
-        { name: 'Signal', icon: 'fa-solid fa-comment-dots', color: '#3A76F0', href: '#' }
-    ];
-    export let phoneNumber = "+38 (067) 215-88-88";
+    let {
+        messengers = [
+            { name: 'Telegram', icon: 'fa-brands fa-telegram', color: '#0088cc', href: '#' },
+            { name: 'Viber', icon: 'fa-brands fa-viber', color: '#7360f2', href: '#' },
+            { name: 'WhatsApp', icon: 'fa-brands fa-whatsapp', color: '#25D366', href: '#' },
+            { name: 'Signal', icon: 'fa-solid fa-comment-dots', color: '#3A76F0', href: '#' }
+        ],
+        phoneNumber = "+38 (067) 215-88-88"
+    } = $props();
 </script>
 
 <div class="messenger-block">

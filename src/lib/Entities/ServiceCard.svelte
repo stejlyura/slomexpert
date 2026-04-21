@@ -1,9 +1,10 @@
 <script>
-    export let icon = "";
-    export let title = "";
-    export let description = "";
-    /** @type {'white' | 'orange'} */
-    export let variant = 'white';
+    let {
+        icon = "",
+        title = "",
+        description = "",
+        variant = 'white'
+    } = $props();
 </script>
 
 <div class="service-card {variant} shadow-brutal-sm">

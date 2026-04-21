@@ -1,9 +1,12 @@
 <script>
-    /** @type {'orange' | 'white' | 'tire'} */
-    export let variant = 'orange';
-    export let type = 'button';
-    export let className = '';
-    export let href = '';
+    let {
+        variant = 'orange',
+        type = 'button',
+        className = '',
+        href = '',
+        children,
+        ...rest
+    } = $props();
 
     const variants = {
         orange: 'bg-[var(--color-orange)] text-[var(--color-white)] hover:bg-[var(--color-orange-hover)]',
@@ -16,17 +19,17 @@
     <a 
         {href} 
         class="btn-brutal {variants[variant]} {className}"
-        on:click
+        {...rest}
     >
-        <slot />
+        {@render children?.()}
     </a>
 {:else}
     <button 
         {type} 
         class="btn-brutal {variants[variant]} {className}"
-        on:click
+        {...rest}
     >
-        <slot />
+        {@render children?.()}
     </button>
 {/if}
 
