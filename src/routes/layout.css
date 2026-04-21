@@ -1,2 +1,158 @@
-@import 'tailwindcss';
-@plugin '@tailwindcss/forms';
+@import "tailwindcss";
+@plugin "@tailwindcss/forms";
+
+/* Inter */
+@font-face {
+	font-family: 'Inter';
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url('/fonts/inter/inter-v20-latin-regular.woff2') format('woff2');
+}
+@font-face {
+	font-family: 'Inter';
+	font-style: normal;
+	font-weight: 500;
+	font-display: swap;
+	src: url('/fonts/inter/inter-v20-latin-500.woff2') format('woff2');
+}
+@font-face {
+	font-family: 'Inter';
+	font-style: normal;
+	font-weight: 600;
+	font-display: swap;
+	src: url('/fonts/inter/inter-v20-latin-600.woff2') format('woff2');
+}
+
+/* Montserrat */
+@font-face {
+	font-family: 'Montserrat';
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+	src: url('/fonts/montserrat/montserrat-v31-latin-700.woff2') format('woff2');
+}
+@font-face {
+	font-family: 'Montserrat';
+	font-style: normal;
+	font-weight: 800;
+	font-display: swap;
+	src: url('/fonts/montserrat/montserrat-v31-latin-800.woff2') format('woff2');
+}
+@font-face {
+	font-family: 'Montserrat';
+	font-style: normal;
+	font-weight: 900;
+	font-display: swap;
+	src: url('/fonts/montserrat/montserrat-v31-latin-900.woff2') format('woff2');
+}
+
+@theme {
+	--color-tire: #16181a;
+	--color-orange: #ff5a00;
+	--color-orange-hover: #e65100;
+	--color-concrete: #e8ecef;
+	--color-steel: #8a949c;
+
+	--font-sans: "Inter", sans-serif;
+	--font-heading: "Montserrat", sans-serif;
+
+	--shadow-brutal: 6px 6px 0px #16181a;
+	--shadow-brutal-sm: 4px 4px 0px #16181a;
+	--shadow-brutal-orange: 6px 6px 0px #ff5a00;
+}
+
+/* ==============================================
+   БАЗОВІ СТИЛІ
+   ============================================== */
+body {
+	background-color: #e8ecef;
+	color: #16181a;
+	overflow-x: hidden;
+	scroll-behavior: smooth;
+}
+
+.font-heading {
+	font-family: "Montserrat", sans-serif;
+	text-transform: uppercase;
+}
+
+/* Брутальні елементи */
+.btn-brutal {
+	border: 3px solid #16181a;
+	box-shadow: 6px 6px 0px #16181a;
+	transition:
+		transform 0.1s ease,
+		box-shadow 0.1s ease;
+}
+
+.btn-brutal:active {
+	transform: translate(6px, 6px);
+	box-shadow: 0px 0px 0px #16181a;
+}
+
+.card-brutal {
+	border: 3px solid #16181a;
+	box-shadow: 8px 8px 0px #16181a;
+	background: #ffffff;
+}
+
+/* ==============================================
+   CSS-ONLY МОБІЛЬНЕ МЕНЮ (Через Checkbox)
+   ============================================== */
+#mobile-menu-content {
+	display: none;
+}
+
+#mobile-menu-toggle:checked ~ #mobile-menu-content {
+	display: flex;
+}
+
+#mobile-menu-toggle:checked ~ header .menu-icon-bars {
+	display: none;
+}
+
+#mobile-menu-toggle:checked ~ header .menu-icon-close {
+	display: block;
+}
+
+.menu-icon-close {
+	display: none;
+}
+
+/* ==============================================
+   CSS-ONLY КАРУСЕЛЬ (Через Radio Buttons)
+   ============================================== */
+.nav-btn {
+	display: none;
+	cursor: pointer;
+}
+
+/* Логіка перемикання кнопок навігації в залежності від активного слайду */
+#s1:checked ~ .arrows .s1-prev,
+#s1:checked ~ .arrows .s1-next {
+	display: flex;
+}
+
+#s2:checked ~ .arrows .s2-prev,
+#s2:checked ~ .arrows .s2-next {
+	display: flex;
+}
+
+#s3:checked ~ .arrows .s3-prev,
+#s3:checked ~ .arrows .s3-next {
+	display: flex;
+}
+
+/* Логіка зміщення треку каруселі */
+#s1:checked ~ .carousel-viewport .carousel-track {
+	transform: translateX(0%);
+}
+
+#s2:checked ~ .carousel-viewport .carousel-track {
+	transform: translateX(-100%);
+}
+
+#s3:checked ~ .carousel-viewport .carousel-track {
+	transform: translateX(-200%);
+}
