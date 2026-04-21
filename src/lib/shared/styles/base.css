@@ -1,0 +1,139 @@
+@import "./variables.css";
+
+/* Fonts */
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('/fonts/inter/inter-v20-latin-regular.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url('/fonts/inter/inter-v20-latin-500.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url('/fonts/inter/inter-v20-latin-600.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('/fonts/montserrat/montserrat-v31-latin-700.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 800;
+    font-display: swap;
+    src: url('/fonts/montserrat/montserrat-v31-latin-800.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 900;
+    font-display: swap;
+    src: url('/fonts/montserrat/montserrat-v31-latin-900.woff2') format('woff2');
+}
+
+/* Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background-color: var(--color-concrete);
+    color: var(--color-tire);
+    font-family: var(--font-sans);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6, .font-heading {
+    font-family: var(--font-heading);
+    text-transform: uppercase;
+}
+
+/* Brutal Utility Classes */
+.btn-brutal {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: var(--border-brutal);
+    box-shadow: var(--shadow-brutal);
+    background-color: var(--color-orange);
+    color: var(--color-white);
+    font-family: var(--font-heading);
+    font-weight: 700;
+    text-decoration: none;
+    padding: 0.75rem 1.5rem;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-base);
+    cursor: pointer;
+    user-select: none;
+}
+
+.btn-brutal:hover {
+    background-color: var(--color-orange-hover);
+}
+
+.btn-brutal:active {
+    transform: translate(6px, 6px);
+    box-shadow: 0px 0px 0px var(--color-tire);
+}
+
+.card-brutal {
+    background-color: var(--color-white);
+    border: var(--border-brutal);
+    box-shadow: var(--shadow-card);
+    padding: 2rem;
+}
+
+.shadow-brutal {
+    box-shadow: var(--shadow-brutal);
+}
+
+.shadow-brutal-sm {
+    box-shadow: var(--shadow-brutal-sm);
+}
+
+.shadow-brutal-orange {
+    box-shadow: var(--shadow-brutal-orange);
+}
+
+/* Background Grid Pattern */
+.bg-grid {
+    position: relative;
+}
+
+.bg-grid::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(var(--color-tire) 1px, transparent 1px),
+                      linear-gradient(90deg, var(--color-tire) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.05;
+    z-index: -1;
+    pointer-events: none;
+}
