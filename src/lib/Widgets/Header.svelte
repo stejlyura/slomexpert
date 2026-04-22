@@ -15,25 +15,25 @@
     }: { links?: NavLink[] } = $props();
 </script>
 
-<input type="checkbox" id="mobile-menu-toggle" class="hidden-toggle" />
+<input type="checkbox" id="mobile-menu-toggle" class="peer hidden" />
 
-<header class="header">
-    <div class="container">
-        <div class="header-inner">
-            <a href="/" class="logo">
-                <span class="logo-emoji">🏗️</span>
-                <span class="logo-text"
-                    >SLOM<span class="text-orange">EXPERT</span></span
-                >
+<header class="bg-white border-b-4 border-tire sticky top-0 z-[100] header">
+    <div class="max-w-[80rem] mx-auto px-4">
+        <div class="flex justify-between items-center h-20">
+            <a href="/" class="flex items-center gap-2 no-underline text-tire">
+                <span class="text-4xl">🏗️</span>
+                <span class="font-heading font-black text-2xl tracking-tighter">
+                    SLOM<span class="text-orange">EXPERT</span>
+                </span>
             </a>
 
-            <nav class="desktop-nav">
+            <nav class="hidden md:flex gap-8">
                 {#each links as link}
-                    <a href={link.href} class="nav-link">{link.label}</a>
+                    <a href={link.href} class="font-semibold no-underline text-tire transition-colors duration-100 hover:text-orange">{link.label}</a>
                 {/each}
             </nav>
 
-            <div class="header-cta">
+            <div class="hidden sm:block">
                 <Button
                     href="#contact1"
                     variant="orange"
@@ -43,177 +43,35 @@
                 </Button>
             </div>
 
-            <label for="mobile-menu-toggle" class="mobile-toggle-btn">
-                <i class="fa-solid fa-bars menu-icon-bars"></i>
-                <i class="fa-solid fa-xmark menu-icon-close"></i>
+            <label for="mobile-menu-toggle" class="block md:hidden text-3xl cursor-pointer text-tire p-2">
+                <i class="fa-solid fa-bars peer-checked:hidden"></i>
+                <i class="fa-solid fa-xmark hidden peer-checked:block"></i>
             </label>
         </div>
     </div>
 </header>
 
-<nav id="mobile-menu-content" class="mobile-nav">
+<nav id="mobile-menu-content" class="hidden peer-checked:flex flex-col bg-tire text-white font-heading font-bold text-xl border-b-4 border-orange sticky top-20 z-[90]">
     {#each links as link}
-        <a href={link.href} class="mobile-nav-link">
-            <label for="mobile-menu-toggle" class="label-block">
+        <a href={link.href} class="p-4 border-b border-gray-700 no-underline color-inherit hover:bg-gray-800">
+            <label for="mobile-menu-toggle" class="cursor-pointer block w-full">
                 {link.label}
             </label>
         </a>
     {/each}
-    <a href="#contact1" class="mobile-nav-link cta">
-        <label for="mobile-menu-toggle" class="label-block">
+    <a href="#contact1" class="p-4 bg-orange text-center no-underline color-inherit hover:bg-orange-hover">
+        <label for="mobile-menu-toggle" class="cursor-pointer block w-full">
             Замовити дзвінок
         </label>
     </a>
 </nav>
 
 <style>
-    .header {
-        background-color: var(--color-white);
-        border-bottom: var(--border-width-lg) solid var(--color-tire);
-        position: sticky;
-        top: 0;
-        z-index: 100;
-    }
-
-    .container {
-        max-width: 80rem; /* 1280px */
-        margin-left: auto;
-        margin-right: auto;
-        padding-left: 1rem;
-        padding-right: 1rem;
-    }
-
-    .header-inner {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        height: 5rem; /* 80px */
-    }
-
-    .logo {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        text-decoration: none;
-        color: var(--color-tire);
-    }
-
-    .logo-emoji {
-        font-size: 2.25rem;
-    }
-
-    .logo-text {
-        font-family: var(--font-heading);
-        font-weight: 900;
-        font-size: 1.5rem;
-        letter-spacing: -0.05em;
-    }
-
-    .text-orange {
-        color: var(--color-orange);
-    }
-
-    .desktop-nav {
-        display: none;
-        gap: 2rem;
-    }
-
-    @media (min-width: 768px) {
-        .desktop-nav {
-            display: flex;
-        }
-    }
-
-    .nav-link {
-        font-weight: 600;
-        text-decoration: none;
-        color: var(--color-tire);
-        transition: color var(--transition-fast);
-    }
-
-    .nav-link:hover {
-        color: var(--color-orange);
-    }
-
-    .header-cta {
+    /* We still need a tiny bit of CSS for the icon toggle because peer-checked doesn't work deep inside sibling tree easily without specific setup */
+    #mobile-menu-toggle:checked ~ .header .fa-bars {
         display: none;
     }
-
-    @media (min-width: 640px) {
-        .header-cta {
-            display: block;
-        }
-    }
-
-    .mobile-toggle-btn {
+    #mobile-menu-toggle:checked ~ .header .fa-xmark {
         display: block;
-        font-size: 1.875rem;
-        cursor: pointer;
-        color: var(--color-tire);
-        padding: 0.5rem;
-    }
-
-    @media (min-width: 768px) {
-        .mobile-toggle-btn {
-            display: none;
-        }
-    }
-
-    .menu-icon-close {
-        display: none;
-    }
-
-    /* CSS Logic for Mobile Menu */
-    .hidden-toggle {
-        display: none;
-    }
-
-    .mobile-nav {
-        display: none;
-        flex-direction: column;
-        background-color: var(--color-tire);
-        color: var(--color-white);
-        font-family: var(--font-heading);
-        font-weight: 700;
-        font-size: 1.25rem;
-        border-bottom: var(--border-width-lg) solid var(--color-orange);
-        position: sticky;
-        top: 5rem;
-        z-index: 90;
-    }
-
-    #mobile-menu-toggle:checked ~ .mobile-nav {
-        display: flex;
-    }
-
-    #mobile-menu-toggle:checked ~ .header .menu-icon-bars {
-        display: none;
-    }
-
-    #mobile-menu-toggle:checked ~ .header .menu-icon-close {
-        display: block;
-    }
-
-    .mobile-nav-link {
-        padding: 1rem;
-        border-bottom: 1px solid #374151; /* gray-700 */
-        text-decoration: none;
-        color: inherit;
-    }
-
-    .mobile-nav-link:hover {
-        background-color: #1f2937; /* gray-800 */
-    }
-
-    .mobile-nav-link.cta {
-        background-color: var(--color-orange);
-        text-align: center;
-        border-bottom: none;
-    }
-
-    .label-block {
-        cursor: pointer;
-        display: block;
-        width: 100%;
     }
 </style>

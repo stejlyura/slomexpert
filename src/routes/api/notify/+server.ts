@@ -1,13 +1,21 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { TELEGRAM_API, USER_ID } from '$env/static/private';
+import { TELEGRAM_API, USER_ID, TURNSTILE_SECRET_KEY } from '$env/static/private';
 import { z } from 'zod';
+
+// In-memory rate limiting (Map<IP, { count: number, resetAt: number }>)
+// Note: In production on Cloudflare, it's better to use Cloudflare KV
+const rateLimits = new Map<string, { count: number, resetAt: number }>();
+
+// Use secret from env or fallback to testing secret
+const TURNSTILE_SECRET = TURNSTILE_SECRET_KEY || '1x0000000000000000000000000000000AA'; 
 
 // --- SCHEMAS ---
 const contactSchema = z.object({
     name: z.string().min(2).max(100),
     phone: z.string().min(10).max(20),
-    message: z.string().max(1000).optional()
+    message: z.string().max(1000).optional(),
+    turnstileToken: z.string().optional()
 });
 
 const configuratorSchema = z.object({
@@ -17,13 +25,15 @@ const configuratorSchema = z.object({
     details: z.array(z.object({
         label: z.string(),
         qty: z.union([z.string(), z.number()])
-    })).optional()
+    })).optional(),
+    turnstileToken: z.string().optional()
 });
 
 const reviewSchema = z.object({
     name: z.string().min(2).max(100),
     rating: z.union([z.string(), z.number()]),
-    comment: z.string().min(5).max(2000)
+    comment: z.string().min(5).max(2000),
+    turnstileToken: z.string().optional()
 });
 
 /**
@@ -37,26 +47,65 @@ function sanitize(str: string | undefined | null): string {
         .replace(/>/g, '&gt;');
 }
 
-export const POST: RequestHandler = async ({ request, cookies }) => {
+async function verifyTurnstile(token: string | undefined) {
+    if (!token) return false;
+    
+    const formData = new FormData();
+    formData.append('secret', TURNSTILE_SECRET);
+    formData.append('response', token);
+
+    const result = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+        body: formData,
+        method: 'POST',
+    });
+
+    const outcome = await result.json();
+    return outcome.success;
+}
+
+export const POST: RequestHandler = async ({ request, cookies, getClientAddress }) => {
     try {
+        const clientIp = request.headers.get('cf-connecting-ip') || getClientAddress();
         const payload = await request.json();
         const { type, data, website_url } = payload;
 
         // 1. Honeypot check
         if (website_url) {
-            console.warn(`Honeypot triggered for type: ${type}`);
+            console.warn(`Honeypot triggered for type: ${type} from ${clientIp}`);
             return json({ success: true, note: 'Spam filtered' });
         }
 
-        // 2. Rate limiting (max 2 submissions per type per 24h)
-        const limitCookie = `sub_limit_${type}`;
-        const count = parseInt(cookies.get(limitCookie) || '0');
+        // 2. Turnstile Verification
+        const isVerified = await verifyTurnstile(data.turnstileToken);
+        if (!isVerified) {
+            return json({ success: false, error: 'Помилка перевірки безпеки. Спробуйте ще раз.' }, { status: 403 });
+        }
 
-        if (count >= 2) {
-            return json({ 
-                success: false, 
-                error: 'Ви перевищили ліміт повідомлень. Спробуйте пізніше або зателефонуйте нам.' 
-            }, { status: 429 });
+        // 3. IP-based Rate limiting (max 5 submissions per 24h across all types)
+        const now = Date.now();
+        const limit = rateLimits.get(clientIp);
+
+        if (limit && now < limit.resetAt) {
+            if (limit.count >= 5) {
+                return json({ 
+                    success: false, 
+                    error: 'Занадто багато запитів з вашої IP-адреси. Спробуйте пізніше.' 
+                }, { status: 429 });
+            }
+            limit.count++;
+        } else {
+            rateLimits.set(clientIp, { 
+                count: 1, 
+                resetAt: now + (24 * 60 * 60 * 1000) 
+            });
+        }
+
+        // 4. Cookie-based soft limit (per type)
+        const limitCookie = `sub_limit_${type}`;
+        const cookieCount = parseInt(cookies.get(limitCookie) || '0');
+        if (cookieCount >= 2) {
+            // We still allow it if IP limit is not reached, but maybe log it
+            console.info(`Soft limit (cookie) reached for ${type} from ${clientIp}`);
         }
 
         let message = '';
@@ -133,7 +182,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
         }
 
         // Update rate limit cookie
-        cookies.set(limitCookie, (count + 1).toString(), {
+        cookies.set(limitCookie, (cookieCount + 1).toString(), {
             path: '/',
             maxAge: 60 * 60 * 24, // 24 hours
             httpOnly: true,

@@ -67,21 +67,19 @@
     ];
 </script>
 
-<div class="page-wrapper bg-grid">
+<div class="min-h-screen bg-grid">
     <Header />
 
     <main>
         <!-- 2. Hero Section -->
-        <section class="hero-section">
-            <div class="container">
-                <div class="hero-text">
-                    <h1 class="hero-title">
+        <section class="bg-tire text-white py-12 pb-20 border-b-4 border-tire relative">
+            <div class="max-w-[80rem] mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h1 class="font-heading font-black text-4xl md:text-[4rem] leading-[1.1] mb-6">
                         БРУТАЛЬНИЙ ДЕМОНТАЖ <br />
-                        <span class="text-orange underline-brutal"
-                            >БЕЗ ЗАЙВОГО БРУДУ</span
-                        >
+                        <span class="text-orange border-b-4 border-orange">БЕЗ ЗАЙВОГО БРУДУ</span>
                     </h1>
-                    <p class="hero-subtitle">
+                    <p class="text-steel text-lg max-w-2xl mx-auto">
                         Зносимо, ламаємо та розчищаємо будь-які об'єкти в
                         Україні. Швидко. Надійно. Під ключ.
                     </p>
@@ -91,17 +89,17 @@
         </section>
 
         <!-- 3. Contact Form 1 -->
-        <section id="contact1" class="section-padding">
-            <div class="container-sm">
+        <section id="contact1" class="py-16 md:py-24">
+            <div class="max-w-3xl mx-auto px-4">
                 <ContactForm />
             </div>
         </section>
 
         <!-- 4. Experience Section -->
-        <section id="experience" class="section-padding bg-tire text-white">
-            <div class="container">
-                <h2 class="section-title text-center">НАШ ДОСВІД В ЦИФРАХ</h2>
-                <div class="stats-grid">
+        <section id="experience" class="py-16 md:py-24 bg-tire text-white">
+            <div class="max-w-[80rem] mx-auto px-4">
+                <h2 class="font-heading font-black text-4xl mb-12 uppercase text-center">НАШ ДОСВІД В ЦИФРАХ</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                     {#each stats as stat}
                         <StatCard {...stat} />
                     {/each}
@@ -110,19 +108,19 @@
         </section>
 
         <!-- 5. Comparison Section -->
-        <section class="section-padding">
-            <div class="container">
-                <h2 class="section-title text-center">
+        <section class="py-16 md:py-24">
+            <div class="max-w-[80rem] mx-auto px-4">
+                <h2 class="font-heading font-black text-4xl mb-12 uppercase text-center">
                     ЧОМУ МИ, А НЕ "ШАБАШНИКИ"?
                 </h2>
-                <div class="comparison-grid">
+                <div class="flex flex-col md:flex-row gap-8">
                     <!-- Competitors -->
-                    <div class="comparison-card competitors">
-                        <div class="card-header">
+                    <div class="flex-1 p-8 bg-concrete border-3 border-dashed border-steel opacity-80">
+                        <div class="flex items-center gap-3 mb-6 pb-4 border-b-2 border-steel text-steel">
                             <i class="fa-solid fa-face-frown text-3xl"></i>
-                            <h3 class="card-title">Типові конкуренти</h3>
+                            <h3 class="font-heading font-bold text-2xl">Типові конкуренти</h3>
                         </div>
-                        <ul class="comparison-list">
+                        <ul class="flex flex-col gap-4 p-0">
                             <ComparisonItem
                                 type="negative"
                                 text="Ціна зростає під час роботи"
@@ -143,13 +141,13 @@
                     </div>
 
                     <!-- Us -->
-                    <div class="comparison-card us card-brutal">
-                        <div class="badge-brutal">НАШ ПІДХІД</div>
-                        <div class="card-header">
+                    <div class="flex-1 p-8 card-brutal border-orange relative">
+                        <div class="absolute -top-4 -right-4 bg-orange text-white font-heading font-black p-2 px-4 rotate-6 border-2 border-tire">НАШ ПІДХІД</div>
+                        <div class="flex items-center gap-3 mb-6 pb-4 border-b-4 border-tire">
                             <span class="text-3xl">👷‍♂️</span>
-                            <h3 class="card-title">SLOMEXPERT</h3>
+                            <h3 class="font-heading font-bold text-2xl">SLOMEXPERT</h3>
                         </div>
-                        <ul class="comparison-list">
+                        <ul class="flex flex-col gap-4 p-0">
                             <ComparisonItem
                                 type="positive"
                                 text="Фіксована ціна в договорі перед стартом"
@@ -173,10 +171,10 @@
         </section>
 
         <!-- 6. Services Section -->
-        <section id="services" class="section-padding bg-white border-y-brutal">
-            <div class="container">
-                <h2 class="section-title text-center">ЩО МИ ДЕМОНТУЄМО?</h2>
-                <div class="services-grid">
+        <section id="services" class="py-16 md:py-24 bg-white border-y-4 border-tire">
+            <div class="max-w-[80rem] mx-auto px-4">
+                <h2 class="font-heading font-black text-4xl mb-12 uppercase text-center">ЩО МИ ДЕМОНТУЄМО?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {#each services as service}
                         <ServiceCard {...service} />
                     {/each}
@@ -185,17 +183,17 @@
         </section>
 
         <!-- 7. Calculator Section -->
-        <section id="calculator" class="section-padding bg-tire-pattern">
-            <div class="container-sm">
+        <section id="calculator" class="py-16 md:py-24 bg-tire relative overflow-hidden before:content-[''] before:absolute before:inset-0 before:[background:repeating-linear-gradient(45deg,var(--color-orange),var(--color-orange)_40px,var(--color-tire)_40px,var(--color-tire)_80px)] before:opacity-10">
+            <div class="max-w-3xl mx-auto px-4 relative z-10">
                 <Configurator />
             </div>
         </section>
 
         <!-- 8. Workflow Section -->
-        <section class="section-padding bg-concrete">
-            <div class="container">
-                <h2 class="section-title text-center">ЯК МИ ПРАЦЮЄМО</h2>
-                <div class="workflow-grid">
+        <section class="py-16 md:py-24 bg-concrete">
+            <div class="max-w-[80rem] mx-auto px-4">
+                <h2 class="font-heading font-black text-4xl mb-12 uppercase text-center">ЯК МИ ПРАЦЮЄМО</h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8 relative md:before:content-[''] md:before:absolute md:before:top-1/2 md:before:left-0 md:before:w-full md:before:h-2 md:before:bg-tire md:before:-translate-y-1/2 md:before:z-0">
                     {#each steps as step}
                         <StepCard {...step} />
                     {/each}
@@ -204,16 +202,16 @@
         </section>
 
         <!-- 9. Final Contact Section -->
-        <section class="section-padding bg-orange border-b-brutal-lg">
-            <div class="container flex-md-row">
-                <div class="contact-info">
-                    <h2 class="contact-title">ГОТОВІ ДО <br /> ДЕМОНТАЖУ?</h2>
-                    <p class="contact-subtitle">
+        <section class="py-16 md:py-24 bg-orange border-b-8 border-tire">
+            <div class="max-w-[80rem] mx-auto px-4 flex flex-col md:flex-row items-center gap-12">
+                <div class="flex-1">
+                    <h2 class="font-heading font-black text-5xl md:text-[3rem] leading-[0.9] mb-6">ГОТОВІ ДО <br /> ДЕМОНТАЖУ?</h2>
+                    <p class="font-bold text-xl mb-8">
                         Пишіть нам туди, де вам зручно. Ми завжди онлайн.
                     </p>
                     <MessengerBlock />
                 </div>
-                <div class="contact-form-final">
+                <div class="flex-1 w-full">
                     <ContactForm
                         id="contact2"
                         title="Або замовте зворотний дзвінок"
@@ -229,281 +227,3 @@
 
     <Footer />
 </div>
-
-<style>
-    .page-wrapper {
-        min-height: 100vh;
-    }
-
-    .container {
-        max-width: 80rem;
-        margin-left: auto;
-        margin-right: auto;
-        padding-left: 1rem;
-        padding-right: 1rem;
-    }
-
-    .container-sm {
-        max-width: 48rem; /* 768px */
-        margin-left: auto;
-        margin-right: auto;
-        padding-left: 1rem;
-        padding-right: 1rem;
-    }
-
-    .section-padding {
-        padding-top: 4rem;
-        padding-bottom: 4rem;
-    }
-
-    @media (min-width: 768px) {
-        .section-padding {
-            padding-top: 6rem;
-            padding-bottom: 6rem;
-        }
-    }
-
-    .section-title {
-        font-family: var(--font-heading);
-        font-weight: 900;
-        font-size: 2.25rem;
-        margin-bottom: 3rem;
-        text-transform: uppercase;
-    }
-
-    /* Hero */
-    .hero-section {
-        background-color: var(--color-tire);
-        color: var(--color-white);
-        padding: 3rem 0 5rem;
-        border-bottom: var(--border-width-lg) solid var(--color-tire);
-        position: relative;
-    }
-
-    .hero-text {
-        text-align: center;
-        margin-bottom: 3rem;
-    }
-
-    .hero-title {
-        font-family: var(--font-heading);
-        font-weight: 900;
-        font-size: 2.5rem;
-        line-height: 1.1;
-        margin-bottom: 1.5rem;
-    }
-
-    @media (min-width: 768px) {
-        .hero-title {
-            font-size: 4rem;
-        }
-    }
-
-    .text-orange {
-        color: var(--color-orange);
-    }
-
-    .underline-brutal {
-        border-bottom: 4px solid var(--color-orange);
-    }
-
-    .hero-subtitle {
-        color: var(--color-steel);
-        font-size: 1.125rem;
-        max-width: 42rem;
-        margin: 0 auto;
-    }
-
-    /* Experience */
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1.5rem;
-    }
-
-    @media (min-width: 768px) {
-        .stats-grid {
-            grid-template-columns: repeat(4, 1fr);
-        }
-    }
-
-    /* Comparison */
-    .comparison-grid {
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
-    }
-
-    @media (min-width: 768px) {
-        .comparison-grid {
-            flex-direction: row;
-        }
-    }
-
-    .comparison-card {
-        flex: 1;
-        padding: 2rem;
-    }
-
-    .competitors {
-        background-color: var(--color-concrete);
-        border: var(--border-width) dashed var(--color-steel);
-        opacity: 0.8;
-    }
-
-    .us {
-        border-color: var(--color-orange);
-        position: relative;
-    }
-
-    .badge-brutal {
-        position: absolute;
-        top: -1rem;
-        right: -1rem;
-        background-color: var(--color-orange);
-        color: var(--color-white);
-        font-family: var(--font-heading);
-        font-weight: 900;
-        padding: 0.5rem 1rem;
-        transform: rotate(6deg);
-        border: 2px solid var(--color-tire);
-    }
-
-    .card-header {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        margin-bottom: 1.5rem;
-        padding-bottom: 1rem;
-        border-bottom: 4px solid var(--color-tire);
-    }
-
-    .competitors .card-header {
-        border-bottom-width: 2px;
-        border-bottom-color: var(--color-steel);
-        color: var(--color-steel);
-    }
-
-    .card-title {
-        font-family: var(--font-heading);
-        font-weight: 700;
-        font-size: 1.5rem;
-    }
-
-    .comparison-list {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        padding: 0;
-    }
-
-    /* Services */
-    .services-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 2rem;
-    }
-
-    @media (min-width: 768px) {
-        .services-grid {
-            grid-template-columns: repeat(3, 1fr);
-        }
-    }
-
-    .border-y-brutal {
-        border-top: var(--border-width-lg) solid var(--color-tire);
-        border-bottom: var(--border-width-lg) solid var(--color-tire);
-    }
-
-    /* Calculator */
-    .bg-tire-pattern {
-        background-color: var(--color-tire);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .bg-tire-pattern::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: repeating-linear-gradient(
-            45deg,
-            var(--color-orange),
-            var(--color-orange) 40px,
-            var(--color-tire) 40px,
-            var(--color-tire) 80px
-        );
-        opacity: 0.1;
-    }
-
-    /* Workflow */
-    .workflow-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 2rem;
-        position: relative;
-    }
-
-    @media (min-width: 768px) {
-        .workflow-grid {
-            grid-template-columns: repeat(4, 1fr);
-        }
-        /* Connection line */
-        .workflow-grid::before {
-            content: "";
-            position: absolute;
-            top: 50%;
-            left: 0;
-            width: 100%;
-            height: 8px;
-            background-color: var(--color-tire);
-            transform: translateY(-50%);
-            z-index: 0;
-        }
-    }
-
-    /* Final Contact */
-    .flex-md-row {
-        display: flex;
-        flex-direction: column;
-        gap: 3rem;
-        align-items: center;
-    }
-
-    @media (min-width: 768px) {
-        .flex-md-row {
-            flex-direction: row;
-        }
-    }
-
-    .contact-info {
-        flex: 1;
-    }
-
-    .contact-title {
-        font-family: var(--font-heading);
-        font-weight: 900;
-        font-size: 3rem;
-        line-height: 0.9;
-        margin-bottom: 1.5rem;
-    }
-
-    .contact-subtitle {
-        font-weight: 700;
-        font-size: 1.25rem;
-        margin-bottom: 2rem;
-    }
-
-    .contact-form-final {
-        flex: 1;
-        width: 100%;
-    }
-
-    .bg-orange {
-        background-color: var(--color-orange);
-    }
-
-    .border-b-brutal-lg {
-        border-bottom: 8px solid var(--color-tire);
-    }
-</style>

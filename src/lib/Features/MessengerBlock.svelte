@@ -10,72 +10,21 @@
     } = $props();
 </script>
 
-<div class="messenger-block">
-    <div class="messengers-grid">
+<div class="flex flex-col gap-8">
+    <div class="flex flex-wrap gap-4">
         {#each messengers as messenger}
             <a 
                 href={messenger.href} 
-                class="messenger-btn shadow-brutal-sm" 
+                class="w-16 h-16 bg-white border-3 border-tire flex items-center justify-center text-3xl transition-all duration-100 hover:bg-concrete hover:-translate-x-0.5 hover:-translate-y-0.5 shadow-brutal-sm" 
                 title={messenger.name}
-                style="--icon-color: {messenger.color}"
+                style="color: {messenger.color}"
             >
                 <i class={messenger.icon}></i>
             </a>
         {/each}
     </div>
 
-    <div class="phone-display shadow-brutal-sm">
+    <div class="font-heading font-black text-3xl md:text-4xl bg-tire text-white p-3 px-6 border-4 border-tire inline-block w-fit shadow-brutal-sm">
         {phoneNumber}
     </div>
 </div>
-
-<style>
-    .messenger-block {
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
-    }
-
-    .messengers-grid {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1rem;
-    }
-
-    .messenger-btn {
-        width: 4rem;
-        height: 4rem;
-        background-color: var(--color-white);
-        border: var(--border-width) solid var(--color-tire);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.875rem;
-        color: var(--icon-color);
-        text-decoration: none;
-        transition: transform var(--transition-fast), background-color var(--transition-fast);
-    }
-
-    .messenger-btn:hover {
-        background-color: var(--color-concrete);
-        transform: translate(-2px, -2px);
-    }
-
-    .phone-display {
-        font-family: var(--font-heading);
-        font-weight: 900;
-        font-size: 1.875rem;
-        background-color: var(--color-tire);
-        color: var(--color-white);
-        padding: 0.75rem 1.5rem;
-        border: var(--border-width-lg) solid var(--color-tire);
-        display: inline-block;
-        width: fit-content;
-    }
-
-    @media (min-width: 768px) {
-        .phone-display {
-            font-size: 2rem;
-        }
-    }
-</style>

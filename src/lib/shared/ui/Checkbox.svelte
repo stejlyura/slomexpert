@@ -26,7 +26,12 @@
     }: Props = $props();
 </script>
 
-<label class="toggle-brutal {className} {checked ? 'is-checked' : ''}" for={id}>
+<label 
+    class="flex items-center justify-center gap-2 p-3 px-4 border-2 border-tire bg-white text-tire font-sans font-bold cursor-pointer transition-all duration-100 select-none text-center hover:bg-orange hover:text-white {className}" 
+    class:bg-tire={type === 'radio' ? group === value : checked}
+    class:text-white={type === 'radio' ? group === value : checked}
+    for={id}
+>
     {#if type === "radio"}
         <input
             {id}
@@ -50,36 +55,3 @@
     {/if}
     {@render children?.()}{label}
 </label>
-
-<style>
-    .toggle-brutal {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        padding: 0.75rem 1rem;
-        border: 2px solid var(--color-tire);
-        background-color: var(--color-white);
-        color: var(--color-tire);
-        font-family: var(--font-sans);
-        font-weight: 700;
-        cursor: pointer;
-        transition: all var(--transition-fast);
-        user-select: none;
-        text-align: center;
-    }
-
-    .toggle-brutal:hover {
-        background-color: var(--color-orange);
-        color: var(--color-white);
-    }
-
-    .toggle-brutal.is-checked {
-        background-color: var(--color-tire);
-        color: var(--color-white);
-    }
-
-    .hidden {
-        display: none;
-    }
-</style>

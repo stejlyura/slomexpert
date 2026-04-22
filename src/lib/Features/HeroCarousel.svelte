@@ -20,7 +20,7 @@
     } = $props();
 </script>
 
-<div class="carousel-container">
+<div class="relative max-w-4xl mx-auto border-4 border-orange bg-tire carousel-container">
     <!-- Hidden Radio Buttons for CSS-only State -->
     {#each slides as _, i}
         <input 
@@ -28,19 +28,19 @@
             name="slider" 
             id="s{i + 1}" 
             checked={i === 0} 
-            class="hidden-radio"
+            class="hidden"
         >
     {/each}
 
     <!-- Viewport -->
-    <div class="carousel-viewport">
-        <div class="carousel-track">
+    <div class="w-full overflow-hidden relative">
+        <div class="flex transition-transform duration-500 ease-in-out w-full carousel-track">
             {#each slides as slide}
-                <div class="slide" style="background-color: {slide.bg}">
-                    <div class="slide-content">
-                        <span class="slide-emoji">{slide.emoji}</span>
-                        <h3 class="slide-title">{slide.title}</h3>
-                        <p class="slide-placeholder">[Фото об'єкта]</p>
+                <div class="shrink-0 w-full h-[300px] md:h-[450px] flex flex-col items-center justify-center text-tire" style="background-color: {slide.bg}">
+                    <div class="text-center">
+                        <span class="text-6xl md:text-[6rem] mb-4 block">{slide.emoji}</span>
+                        <h3 class="font-heading font-bold text-2xl">{slide.title}</h3>
+                        <p class="font-mono text-sm mt-2 opacity-50">[Фото об'єкта]</p>
                     </div>
                 </div>
             {/each}
@@ -48,15 +48,15 @@
     </div>
 
     <!-- Navigation Arrows -->
-    <div class="arrows">
+    <div class="absolute inset-0 pointer-events-none arrows">
         {#each slides as _, i}
             {@const prev = i === 0 ? slides.length : i}
             {@const next = i === slides.length - 1 ? 1 : i + 2}
             
-            <label for="s{prev}" class="nav-btn prev-btn s{i + 1}-nav">
+            <label for="s{prev}" class="hidden absolute top-1/2 -translate-y-1/2 bg-orange text-white w-12 h-12 items-center justify-center cursor-pointer pointer-events-auto text-2xl transition-colors duration-100 hover:bg-orange-hover z-10 left-0 border-r-4 border-y-4 border-tire s{i + 1}-nav">
                 <i class="fa-solid fa-chevron-left"></i>
             </label>
-            <label for="s{next}" class="nav-btn next-btn s{i + 1}-nav">
+            <label for="s{next}" class="hidden absolute top-1/2 -translate-y-1/2 bg-orange text-white w-12 h-12 items-center justify-center cursor-pointer pointer-events-auto text-2xl transition-colors duration-100 hover:bg-orange-hover z-10 right-0 border-l-4 border-y-4 border-tire s{i + 1}-nav">
                 <i class="fa-solid fa-chevron-right"></i>
             </label>
         {/each}
@@ -64,126 +64,14 @@
 </div>
 
 <style>
-    .carousel-container {
-        position: relative;
-        max-width: 56rem; /* 896px */
-        margin-left: auto;
-        margin-right: auto;
-        border: var(--border-width-lg) solid var(--color-orange);
-        background-color: var(--color-tire);
-    }
+    /* CSS Logic for Switching - kept in style block because Tailwind peer/group logic is limited for nth-siblings */
+    #s1:checked ~ .carousel-viewport .carousel-track,
+    #s1:checked ~ div .carousel-track { transform: translateX(0%); }
+    #s2:checked ~ .carousel-viewport .carousel-track,
+    #s2:checked ~ div .carousel-track { transform: translateX(-100%); }
+    #s3:checked ~ .carousel-viewport .carousel-track,
+    #s3:checked ~ div .carousel-track { transform: translateX(-200%); }
 
-    .hidden-radio {
-        display: none;
-    }
-
-    .carousel-viewport {
-        width: 100%;
-        overflow: hidden;
-        position: relative;
-    }
-
-    .carousel-track {
-        display: flex;
-        transition: transform 0.5s ease-in-out;
-        width: 100%;
-    }
-
-    .slide {
-        flex-shrink: 0;
-        width: 100%;
-        height: 300px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        color: var(--color-tire);
-    }
-
-    @media (min-width: 768px) {
-        .slide {
-            height: 450px;
-        }
-    }
-
-    .slide-content {
-        text-align: center;
-    }
-
-    .slide-emoji {
-        font-size: 4rem;
-        margin-bottom: 1rem;
-        display: block;
-    }
-
-    @media (min-width: 768px) {
-        .slide-emoji {
-            font-size: 6rem;
-        }
-    }
-
-    .slide-title {
-        font-family: var(--font-heading);
-        font-weight: 700;
-        font-size: 1.5rem;
-    }
-
-    .slide-placeholder {
-        font-family: monospace;
-        font-size: 0.875rem;
-        margin-top: 0.5rem;
-        opacity: 0.5;
-    }
-
-    /* Navigation Arrows */
-    .arrows {
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-    }
-
-    .nav-btn {
-        display: none;
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        background-color: var(--color-orange);
-        color: var(--color-white);
-        width: 3rem;
-        height: 3rem;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        pointer-events: auto;
-        font-size: 1.5rem;
-        transition: background-color var(--transition-fast);
-        z-index: 10;
-    }
-
-    .nav-btn:hover {
-        background-color: var(--color-orange-hover);
-    }
-
-    .prev-btn {
-        left: 0;
-        border-right: 4px solid var(--color-tire);
-        border-top: 4px solid var(--color-tire);
-        border-bottom: 4px solid var(--color-tire);
-    }
-
-    .next-btn {
-        right: 0;
-        border-left: 4px solid var(--color-tire);
-        border-top: 4px solid var(--color-tire);
-        border-bottom: 4px solid var(--color-tire);
-    }
-
-    /* CSS Logic for Switching */
-    #s1:checked ~ .carousel-viewport .carousel-track { transform: translateX(0%); }
-    #s2:checked ~ .carousel-viewport .carousel-track { transform: translateX(-100%); }
-    #s3:checked ~ .carousel-viewport .carousel-track { transform: translateX(-200%); }
-
-    /* Display arrows based on active slide */
     #s1:checked ~ .arrows .s1-nav { display: flex; }
     #s2:checked ~ .arrows .s2-nav { display: flex; }
     #s3:checked ~ .arrows .s3-nav { display: flex; }
