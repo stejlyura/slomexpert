@@ -1,33 +1,69 @@
 <script>
-    import Header from '../Widgets/Header.svelte';
-    import Footer from '../Widgets/Footer.svelte';
-    import HeroCarousel from '../Features/HeroCarousel.svelte';
-    import ContactForm from '../Features/ContactForm.svelte';
-    import StatCard from '../Entities/StatCard.svelte';
-    import ComparisonItem from '../Entities/ComparisonItem.svelte';
-    import ServiceCard from '../Entities/ServiceCard.svelte';
-    import Configurator from '../Features/Configurator.svelte';
-    import StepCard from '../Entities/StepCard.svelte';
-    import MessengerBlock from '../Features/MessengerBlock.svelte';
+    import Header from "../Widgets/Header.svelte";
+    import Footer from "../Widgets/Footer.svelte";
+    import HeroCarousel from "../Features/HeroCarousel.svelte";
+    import ContactForm from "../Features/ContactForm.svelte";
+    import StatCard from "../Entities/StatCard.svelte";
+    import ComparisonItem from "../Entities/ComparisonItem.svelte";
+    import ServiceCard from "../Entities/ServiceCard.svelte";
+    import Configurator from "../Features/Configurator.svelte";
+    import StepCard from "../Entities/StepCard.svelte";
+    import MessengerBlock from "../Features/MessengerBlock.svelte";
+    import ReviewForm from "../Features/ReviewForm.svelte";
 
     const services = [
-        { icon: "🏭", title: "Промислові об'єкти", description: "Ангари, заводи, цехи. Тяжка техніка та різання металоконструкцій.", variant: "white" },
-        { icon: "🏠", title: "Приватні будинки", description: "Акуратне знесення старих будинків, дач, сараїв зі збереженням матеріалів.", variant: "orange" },
-        { icon: "🚪", title: "Квартирний демонтаж", description: "Стяжка, перегородки, плитка. Працюємо тихо (наскільки це можливо).", variant: "white" }
+        {
+            icon: "🏭",
+            title: "Промислові об'єкти",
+            description:
+                "Ангари, заводи, цехи. Тяжка техніка та різання металоконструкцій.",
+            variant: "white",
+        },
+        {
+            icon: "🏠",
+            title: "Приватні будинки",
+            description:
+                "Акуратне знесення старих будинків, дач, сараїв зі збереженням матеріалів.",
+            variant: "orange",
+        },
+        {
+            icon: "🚪",
+            title: "Квартирний демонтаж",
+            description:
+                "Стяжка, перегородки, плитка. Працюємо тихо (наскільки це можливо).",
+            variant: "white",
+        },
     ];
 
     const stats = [
         { value: "> 10", label: "Років на ринку" },
         { value: "500+", label: "Успішних об'єктів" },
         { value: "24/7", label: "Графік роботи" },
-        { value: "15", label: "Одиниць техніки" }
+        { value: "15", label: "Одиниць техніки" },
     ];
 
     const steps = [
-        { number: 1, title: "Заявка", description: "Ви телефонуєте або залишаєте заявку на сайті." },
-        { number: 2, title: "Оцінка", description: "Майстер виїжджає на об'єкт, складає кошторис." },
-        { number: 3, title: "Демонтаж", description: "Заганяємо техніку, швидко та акуратно ламаємо." },
-        { number: 4, title: "Чистота", description: "Вивозимо сміття, ви приймаєте чистий майданчик.", variant: "tire" }
+        {
+            number: 1,
+            title: "Заявка",
+            description: "Ви телефонуєте або залишаєте заявку на сайті.",
+        },
+        {
+            number: 2,
+            title: "Оцінка",
+            description: "Майстер виїжджає на об'єкт, складає кошторис.",
+        },
+        {
+            number: 3,
+            title: "Демонтаж",
+            description: "Заганяємо техніку, швидко та акуратно ламаємо.",
+        },
+        {
+            number: 4,
+            title: "Чистота",
+            description: "Вивозимо сміття, ви приймаєте чистий майданчик.",
+            variant: "tire",
+        },
     ];
 </script>
 
@@ -40,11 +76,14 @@
             <div class="container">
                 <div class="hero-text">
                     <h1 class="hero-title">
-                        БРУТАЛЬНИЙ ДЕМОНТАЖ <br> 
-                        <span class="text-orange underline-brutal">БЕЗ ЗАЙВОГО БРУДУ</span>
+                        БРУТАЛЬНИЙ ДЕМОНТАЖ <br />
+                        <span class="text-orange underline-brutal"
+                            >БЕЗ ЗАЙВОГО БРУДУ</span
+                        >
                     </h1>
                     <p class="hero-subtitle">
-                        Зносимо, ламаємо та розчищаємо будь-які об'єкти в Україні. Швидко. Надійно. Під ключ.
+                        Зносимо, ламаємо та розчищаємо будь-які об'єкти в
+                        Україні. Швидко. Надійно. Під ключ.
                     </p>
                 </div>
                 <HeroCarousel />
@@ -73,7 +112,9 @@
         <!-- 5. Comparison Section -->
         <section class="section-padding">
             <div class="container">
-                <h2 class="section-title text-center">ЧОМУ МИ, А НЕ "ШАБАШНИКИ"?</h2>
+                <h2 class="section-title text-center">
+                    ЧОМУ МИ, А НЕ "ШАБАШНИКИ"?
+                </h2>
                 <div class="comparison-grid">
                     <!-- Competitors -->
                     <div class="comparison-card competitors">
@@ -82,10 +123,22 @@
                             <h3 class="card-title">Типові конкуренти</h3>
                         </div>
                         <ul class="comparison-list">
-                            <ComparisonItem type="negative" text="Ціна зростає під час роботи" />
-                            <ComparisonItem type="negative" text="Залишають гори будівельного сміття" />
-                            <ComparisonItem type="negative" text="Зривають терміни здачі" />
-                            <ComparisonItem type="negative" text="Працюють 'в чорну' без гарантій" />
+                            <ComparisonItem
+                                type="negative"
+                                text="Ціна зростає під час роботи"
+                            />
+                            <ComparisonItem
+                                type="negative"
+                                text="Залишають гори будівельного сміття"
+                            />
+                            <ComparisonItem
+                                type="negative"
+                                text="Зривають терміни здачі"
+                            />
+                            <ComparisonItem
+                                type="negative"
+                                text="Працюють 'в чорну' без гарантій"
+                            />
                         </ul>
                     </div>
 
@@ -97,10 +150,22 @@
                             <h3 class="card-title">SLOMEXPERT</h3>
                         </div>
                         <ul class="comparison-list">
-                            <ComparisonItem type="positive" text="Фіксована ціна в договорі перед стартом" />
-                            <ComparisonItem type="positive" text="Повний вивіз сміття та прибирання об'єкта" />
-                            <ComparisonItem type="positive" text="Чітке дотримання дедлайнів. Штрафи за затримку" />
-                            <ComparisonItem type="positive" text="Всі дозвільні документи та гарантія безпеки" />
+                            <ComparisonItem
+                                type="positive"
+                                text="Фіксована ціна в договорі перед стартом"
+                            />
+                            <ComparisonItem
+                                type="positive"
+                                text="Повний вивіз сміття та прибирання об'єкта"
+                            />
+                            <ComparisonItem
+                                type="positive"
+                                text="Чітке дотримання дедлайнів. Штрафи за затримку"
+                            />
+                            <ComparisonItem
+                                type="positive"
+                                text="Всі дозвільні документи та гарантія безпеки"
+                            />
                         </ul>
                     </div>
                 </div>
@@ -142,12 +207,14 @@
         <section class="section-padding bg-orange border-b-brutal-lg">
             <div class="container flex-md-row">
                 <div class="contact-info">
-                    <h2 class="contact-title">ГОТОВІ ДО <br> ДЕМОНТАЖУ?</h2>
-                    <p class="contact-subtitle">Пишіть нам туди, де вам зручно. Ми завжди онлайн.</p>
+                    <h2 class="contact-title">ГОТОВІ ДО <br /> ДЕМОНТАЖУ?</h2>
+                    <p class="contact-subtitle">
+                        Пишіть нам туди, де вам зручно. Ми завжди онлайн.
+                    </p>
                     <MessengerBlock />
                 </div>
                 <div class="contact-form-final">
-                    <ContactForm 
+                    <ContactForm
                         id="contact2"
                         title="Або замовте зворотний дзвінок"
                         description=""
@@ -156,6 +223,8 @@
                 </div>
             </div>
         </section>
+        <!-- 10. Reviews Section -->
+        <!-- <ReviewForm /> -->
     </main>
 
     <Footer />
@@ -357,7 +426,13 @@
         content: "";
         position: absolute;
         inset: 0;
-        background: repeating-linear-gradient(45deg, var(--color-orange), var(--color-orange) 40px, var(--color-tire) 40px, var(--color-tire) 80px);
+        background: repeating-linear-gradient(
+            45deg,
+            var(--color-orange),
+            var(--color-orange) 40px,
+            var(--color-tire) 40px,
+            var(--color-tire) 80px
+        );
         opacity: 0.1;
     }
 

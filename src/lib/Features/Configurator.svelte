@@ -1,4 +1,6 @@
 <script lang="ts">
+    import Input from "$lib/shared/ui/Input.svelte";
+
     interface ServiceOption { value: number; label: string; }
     interface BaseRow { id: string; price: number; qty: number; }
     interface DrillingRow extends BaseRow { depth: number; }
@@ -41,6 +43,8 @@
     let reinforcements: BaseRow[] = $state([{ id: uid(), price: 0, qty: 0 }]);
     let trashBags: number = $state(0);
     let truckPrice: number = $state(0);
+    let userName: string = $state("");
+    let userPhone: string = $state("");
 
     function addRow<T extends { id: string }>(arr: T[], fields: Omit<T, "id">): T[] {
         return [...arr, { id: uid(), ...fields } as T];
@@ -58,9 +62,60 @@
     );
     let formattedTotal = $derived(totalSum.toLocaleString("uk-UA"));
 
-    function handleSubmit(e: Event) {
+    let isSubmitting = $state(false);
+    let feedback = $state({ message: "", type: "" });
+
+    async function handleSubmit(e: Event) {
         e.preventDefault();
-        alert(`Ціну зафіксовано: ${formattedTotal} ₴. Наш менеджер зв'яжеться з вами.`);
+        isSubmitting = true;
+        feedback = { message: "", type: "" };
+
+        const details: any[] = [];
+        demolitions.filter(r => r.price > 0 && r.qty > 0).forEach(r => {
+            details.push({ label: demolitionOptions.find(o => o.value === r.price)?.label, qty: r.qty });
+        });
+        cuttings.filter(r => r.price > 0 && r.qty > 0).forEach(r => {
+            details.push({ label: cuttingOptions.find(o => o.value === r.price)?.label, qty: r.qty });
+        });
+        drillings.filter(r => r.price > 0 && r.depth > 0 && r.qty > 0).forEach(r => {
+            details.push({ label: `${drillingOptions.find(o => o.value === r.price)?.label} (гл. ${r.depth}см)`, qty: r.qty });
+        });
+        reinforcements.filter(r => r.price > 0 && r.qty > 0).forEach(r => {
+            details.push({ label: reinforcementOptions.find(o => o.value === r.price)?.label, qty: r.qty });
+        });
+        if (trashBags > 0) details.push({ label: "Мішки для сміття", qty: trashBags });
+        if (truckPrice > 0) details.push({ label: truckPrice === 2500 ? "ЗІЛ 5т" : "КАМАЗ 10т", qty: 1 });
+
+        try {
+            const response = await fetch('/api/notify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'configurator',
+                    data: {
+                        userName,
+                        userPhone,
+                        totalPrice: formattedTotal,
+                        details
+                    }
+                })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                feedback = { message: "Розрахунок зафіксовано! Очікуйте на дзвінок менеджера.", type: "success" };
+                // Reset basic info
+                userName = "";
+                userPhone = "";
+            } else {
+                feedback = { message: result.error || "Помилка відправки. Спробуйте пізніше.", type: "error" };
+            }
+        } catch (err) {
+            feedback = { message: "Сервер недоступний. Перевірте мережу.", type: "error" };
+        } finally {
+            isSubmitting = false;
+        }
     }
 </script>
 
@@ -85,7 +140,7 @@
                         <div class="field-wrap">
                             <label class="field-label" for="dem-type-{item.id}">Вид робіт</label>
                             <div class="select-wrap">
-                                <select id="dem-type-{item.id}" class="c-select" bind:value={item.price}>
+                                <select id="dem-type-{item.id}" class="c-select" bind:value={item.price} disabled={isSubmitting}>
                                     <option value={0}>Оберіть послугу...</option>
                                     {#each demolitionOptions as o}<option value={o.value}>{o.label}</option>{/each}
                                 </select>
@@ -94,16 +149,16 @@
                         </div>
                         <div class="field-wrap">
                             <label class="field-label" for="dem-qty-{item.id}">Площа (м²) або Кількість (шт)</label>
-                            <input id="dem-qty-{item.id}" type="number" min="0" class="c-input" placeholder="0" bind:value={item.qty} />
+                            <input id="dem-qty-{item.id}" type="number" min="0" class="c-input" placeholder="0" bind:value={item.qty} disabled={isSubmitting} />
                         </div>
                         {#if demolitions.length > 1}
-                            <button type="button" class="btn-remove" onclick={() => demolitions = removeRow(demolitions, item.id)} title="Видалити">
+                            <button type="button" class="btn-remove" onclick={() => demolitions = removeRow(demolitions, item.id)} title="Видалити" disabled={isSubmitting}>
                                 <i class="fa-solid fa-xmark"></i>
                             </button>
                         {/if}
                     </div>
                 {/each}
-                <button type="button" class="btn-add" onclick={() => demolitions = addRow(demolitions, { price:0, qty:0 })}>
+                <button type="button" class="btn-add" onclick={() => demolitions = addRow(demolitions, { price:0, qty:0 })} disabled={isSubmitting}>
                     <i class="fa-solid fa-plus"></i> Додати ще демонтаж
                 </button>
             </div>
@@ -118,7 +173,7 @@
                         <div class="field-wrap">
                             <label class="field-label" for="cut-type-{item.id}">Тип матеріалу</label>
                             <div class="select-wrap">
-                                <select id="cut-type-{item.id}" class="c-select" bind:value={item.price}>
+                                <select id="cut-type-{item.id}" class="c-select" bind:value={item.price} disabled={isSubmitting}>
                                     <option value={0}>Оберіть послугу...</option>
                                     {#each cuttingOptions as o}<option value={o.value}>{o.label}</option>{/each}
                                 </select>
@@ -127,16 +182,16 @@
                         </div>
                         <div class="field-wrap">
                             <label class="field-label" for="cut-qty-{item.id}">Довжина (м.п.) або Кількість (шт)</label>
-                            <input id="cut-qty-{item.id}" type="number" min="0" class="c-input" placeholder="0" bind:value={item.qty} />
+                            <input id="cut-qty-{item.id}" type="number" min="0" class="c-input" placeholder="0" bind:value={item.qty} disabled={isSubmitting} />
                         </div>
                         {#if cuttings.length > 1}
-                            <button type="button" class="btn-remove" onclick={() => cuttings = removeRow(cuttings, item.id)} title="Видалити">
+                            <button type="button" class="btn-remove" onclick={() => cuttings = removeRow(cuttings, item.id)} title="Видалити" disabled={isSubmitting}>
                                 <i class="fa-solid fa-xmark"></i>
                             </button>
                         {/if}
                     </div>
                 {/each}
-                <button type="button" class="btn-add" onclick={() => cuttings = addRow(cuttings, { price:0, qty:0 })}>
+                <button type="button" class="btn-add" onclick={() => cuttings = addRow(cuttings, { price:0, qty:0 })} disabled={isSubmitting}>
                     <i class="fa-solid fa-plus"></i> Додати ще різку
                 </button>
             </div>
@@ -153,7 +208,7 @@
                             <div class="field-wrap">
                                 <label class="field-label" for="dr-type-{item.id}">Діаметр коронки</label>
                                 <div class="select-wrap">
-                                    <select id="dr-type-{item.id}" class="c-select" bind:value={item.price}>
+                                    <select id="dr-type-{item.id}" class="c-select" bind:value={item.price} disabled={isSubmitting}>
                                         <option value={0}>Оберіть...</option>
                                         {#each drillingOptions as o}<option value={o.value}>{o.label}</option>{/each}
                                     </select>
@@ -163,21 +218,21 @@
                             <div class="row-inline">
                                 <div class="field-wrap">
                                     <label class="field-label field-label-xs" for="dr-depth-{item.id}">Глибина (см)</label>
-                                    <input id="dr-depth-{item.id}" type="number" min="0" class="c-input" placeholder="0" bind:value={item.depth} />
+                                    <input id="dr-depth-{item.id}" type="number" min="0" class="c-input" placeholder="0" bind:value={item.depth} disabled={isSubmitting} />
                                 </div>
                                 <div class="field-wrap">
                                     <label class="field-label field-label-xs" for="dr-qty-{item.id}">К-сть (шт)</label>
-                                    <input id="dr-qty-{item.id}" type="number" min="0" class="c-input" placeholder="0" bind:value={item.qty} />
+                                    <input id="dr-qty-{item.id}" type="number" min="0" class="c-input" placeholder="0" bind:value={item.qty} disabled={isSubmitting} />
                                 </div>
                                 {#if drillings.length > 1}
-                                    <button type="button" class="btn-remove btn-remove-sm" onclick={() => drillings = removeRow(drillings, item.id)} title="Видалити">
+                                    <button type="button" class="btn-remove btn-remove-sm" onclick={() => drillings = removeRow(drillings, item.id)} title="Видалити" disabled={isSubmitting}>
                                         <i class="fa-solid fa-xmark"></i>
                                     </button>
                                 {/if}
                             </div>
                         </div>
                     {/each}
-                    <button type="button" class="btn-add" onclick={() => drillings = addRow(drillings, { price:0, depth:0, qty:0 })}>
+                    <button type="button" class="btn-add" onclick={() => drillings = addRow(drillings, { price:0, depth:0, qty:0 })} disabled={isSubmitting}>
                         <i class="fa-solid fa-plus"></i> Додати ще отвори
                     </button>
                 </div>
@@ -192,7 +247,7 @@
                             <div class="field-wrap">
                                 <label class="field-label" for="re-type-{item.id}">Конструкція підсилення</label>
                                 <div class="select-wrap">
-                                    <select id="re-type-{item.id}" class="c-select" bind:value={item.price}>
+                                    <select id="re-type-{item.id}" class="c-select" bind:value={item.price} disabled={isSubmitting}>
                                         <option value={0}>Оберіть...</option>
                                         {#each reinforcementOptions as o}<option value={o.value}>{o.label}</option>{/each}
                                     </select>
@@ -202,17 +257,17 @@
                             <div class="row-inline">
                                 <div class="field-wrap" style="flex:1;">
                                     <label class="field-label field-label-xs" for="re-qty-{item.id}">Кількість пройомів (шт)</label>
-                                    <input id="re-qty-{item.id}" type="number" min="0" class="c-input" placeholder="0" bind:value={item.qty} />
+                                    <input id="re-qty-{item.id}" type="number" min="0" class="c-input" placeholder="0" bind:value={item.qty} disabled={isSubmitting} />
                                 </div>
                                 {#if reinforcements.length > 1}
-                                    <button type="button" class="btn-remove btn-remove-sm" onclick={() => reinforcements = removeRow(reinforcements, item.id)} title="Видалити">
+                                    <button type="button" class="btn-remove btn-remove-sm" onclick={() => reinforcements = removeRow(reinforcements, item.id)} title="Видалити" disabled={isSubmitting}>
                                         <i class="fa-solid fa-xmark"></i>
                                     </button>
                                 {/if}
                             </div>
                         </div>
                     {/each}
-                    <button type="button" class="btn-add" onclick={() => reinforcements = addRow(reinforcements, { price:0, qty:0 })}>
+                    <button type="button" class="btn-add" onclick={() => reinforcements = addRow(reinforcements, { price:0, qty:0 })} disabled={isSubmitting}>
                         <i class="fa-solid fa-plus"></i> Додати ще підсилення
                     </button>
                 </div>
@@ -232,18 +287,36 @@
                         class="c-input trash-input"
                         placeholder="0 шт"
                         bind:value={trashBags}
+                        disabled={isSubmitting}
                     />
                 </div>
                 <div class="truck-grid">
                     <label class="truck-option {truckPrice === 0 ? 'truck-option--active' : ''}">
-                        <input type="radio" name="truck" value="0" class="hidden-radio" onclick={() => truckPrice = 0} /> Без машини
+                        <input type="radio" name="truck" value="0" class="hidden-radio" onclick={() => truckPrice = 0} disabled={isSubmitting} /> Без машини
                     </label>
                     <label class="truck-option {truckPrice === 2500 ? 'truck-option--active' : ''}">
-                        <input type="radio" name="truck" value="2500" class="hidden-radio" onclick={() => truckPrice = 2500} /> ЗІЛ 5т (+2500 ₴)
+                        <input type="radio" name="truck" value="2500" class="hidden-radio" onclick={() => truckPrice = 2500} disabled={isSubmitting} /> ЗІЛ 5т (+2500 ₴)
                     </label>
                     <label class="truck-option {truckPrice === 4500 ? 'truck-option--active' : ''}">
-                        <input type="radio" name="truck" value="4500" class="hidden-radio" onclick={() => truckPrice = 4500} /> КАМАЗ 10т (+4500 ₴)
+                        <input type="radio" name="truck" value="4500" class="hidden-radio" onclick={() => truckPrice = 4500} disabled={isSubmitting} /> КАМАЗ 10т (+4500 ₴)
                     </label>
+                </div>
+            </div>
+
+            <!-- Ваші контакти -->
+            <div class="calc-block">
+                <h3 class="calc-block-title">
+                    <i class="fa-solid fa-user icon-orange"></i> Ваші контакти
+                </h3>
+                <div class="row-grid">
+                    <div class="field-wrap">
+                        <label class="field-label" for="user-name">Ваше ім'я</label>
+                        <Input id="user-name" placeholder="Олександр" bind:value={userName} required disabled={isSubmitting} />
+                    </div>
+                    <div class="field-wrap">
+                        <label class="field-label" for="user-phone">Номер телефону</label>
+                        <Input id="user-phone" type="tel" placeholder="+38 (0XX) XXX-XX-XX" bind:value={userPhone} required disabled={isSubmitting} />
+                    </div>
                 </div>
             </div>
 
@@ -256,13 +329,31 @@
                         <span class="summary-currency">₴</span>
                     </div>
                 </div>
-                <button type="submit" class="btn-submit">ЗАФІКСУВАТИ ЦІНУ</button>
+                <button type="submit" class="btn-submit" disabled={isSubmitting}>
+                    {isSubmitting ? "ВІДПРАВКА..." : "ЗАФІКСУВАТИ ЦІНУ"}
+                </button>
             </div>
+
+            {#if feedback.message}
+                <div class="feedback {feedback.type}">
+                    {feedback.message}
+                </div>
+            {/if}
         </form>
     </div>
 </section>
 
 <style>
+    .feedback {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        font-weight: 700;
+        border: 4px solid var(--color-tire);
+        text-align: center;
+    }
+    .feedback.success { background-color: #dcfce7; color: #166534; border-color: #166534; }
+    .feedback.error { background-color: #fee2e2; color: #991b1b; border-color: #991b1b; }
+
     /* ── Section ── */
     .calc-section {
         padding: 5rem 1rem;

@@ -11,10 +11,37 @@
 
     let name = $state("");
     let phone = $state("");
+    let isSubmitting = $state(false);
+    let feedback = $state({ message: "", type: "" });
 
-    function handleSubmit() {
-        console.log("Form submitted:", { name, phone });
-        // Handle form submission logic here
+    async function handleSubmit() {
+        isSubmitting = true;
+        feedback = { message: "", type: "" };
+
+        try {
+            const response = await fetch('/api/notify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'contact',
+                    data: { name, phone }
+                })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                feedback = { message: "Дякуємо! Ми зателефонуємо вам найближчим часом.", type: "success" };
+                name = "";
+                phone = "";
+            } else {
+                feedback = { message: result.error || "Помилка відправки. Спробуйте пізніше.", type: "error" };
+            }
+        } catch (err) {
+            feedback = { message: "Сервер недоступний. Перевірте з'єднання.", type: "error" };
+        } finally {
+            isSubmitting = false;
+        }
     }
 </script>
 
@@ -27,6 +54,7 @@
             bind:value={name} 
             placeholder="Ваше ім'я" 
             required 
+            disabled={isSubmitting}
             className="flex-1"
         />
         <Input 
@@ -34,15 +62,39 @@
             type="tel" 
             placeholder="+38 (0__) ___-__-__" 
             required 
+            disabled={isSubmitting}
             className="flex-1"
         />
-        <Button type="submit" variant="orange" className="px-8 py-4 text-lg">
-            {buttonText}
+        <Button type="submit" variant="orange" className="px-8 py-4 text-lg min-w-[200px]" disabled={isSubmitting}>
+            {isSubmitting ? "ВІДПРАВКА..." : buttonText}
         </Button>
     </form>
+
+    {#if feedback.message}
+        <div class="feedback {feedback.type}">
+            {feedback.message}
+        </div>
+    {/if}
 </div>
 
 <style>
+    .feedback {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        font-weight: 700;
+        border: 3px solid var(--color-tire);
+    }
+    .feedback.success {
+        background-color: #dcfce7;
+        color: #166534;
+        border-color: #166534;
+    }
+    .feedback.error {
+        background-color: #fee2e2;
+        color: #991b1b;
+        border-color: #991b1b;
+    }
+
     .title {
         font-family: var(--font-heading);
         font-weight: 900;
