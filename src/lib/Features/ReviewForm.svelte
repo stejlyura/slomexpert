@@ -65,7 +65,7 @@
                     </div>
 
                     <div class="field-wrap">
-                        <label class="field-label">Ваша оцінка</label>
+                        <span class="field-label">Ваша оцінка</span>
                         <div class="stars-container">
                             {#each [1, 2, 3, 4, 5] as star}
                                 <button 

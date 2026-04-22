@@ -103,21 +103,33 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
         }
 
         const url = `https://api.telegram.org/bot${TELEGRAM_API}/sendMessage`;
+        const userIds = USER_ID.split(',').map(id => id.trim());
         
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                chat_id: USER_ID,
-                text: message,
-                parse_mode: 'HTML'
-            })
+        const sendPromises = userIds.map(async (chatId) => {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: chatId,
+                    text: message,
+                    parse_mode: 'HTML'
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error(`Telegram API Error for ID ${chatId}:`, errorData);
+                return { success: false, id: chatId };
+            }
+            return { success: true, id: chatId };
         });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.error('Telegram API Error:', errorData);
-            return json({ success: false, error: 'Failed to send Telegram message' }, { status: 500 });
+        const results = await Promise.all(sendPromises);
+        const failed = results.filter(r => !r.success);
+
+        if (failed.length === userIds.length) {
+            // All failed
+            return json({ success: false, error: 'Failed to send Telegram messages' }, { status: 500 });
         }
 
         // Update rate limit cookie
