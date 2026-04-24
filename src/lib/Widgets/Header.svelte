@@ -1,5 +1,6 @@
 <script lang="ts">
     import Button from "../shared/ui/Button.svelte";
+    import Icon from "../shared/ui/Icon.svelte";
 
     export interface NavLink {
         href: string;
@@ -44,8 +45,8 @@
             </div>
 
             <label for="mobile-menu-toggle" class="block md:hidden text-3xl cursor-pointer text-tire p-2">
-                <i class="fa-solid fa-bars peer-checked:hidden"></i>
-                <i class="fa-solid fa-xmark hidden peer-checked:block"></i>
+                <Icon name="bars" className="peer-checked-hidden" />
+                <Icon name="xmark" className="hidden peer-checked-block" />
             </label>
         </div>
     </div>
@@ -68,10 +69,11 @@
 
 <style>
     /* We still need a tiny bit of CSS for the icon toggle because peer-checked doesn't work deep inside sibling tree easily without specific setup */
-    #mobile-menu-toggle:checked ~ .header .fa-bars {
+    #mobile-menu-toggle:checked ~ .header .peer-checked-hidden {
         display: none;
     }
-    #mobile-menu-toggle:checked ~ .header .fa-xmark {
+    #mobile-menu-toggle:checked ~ .header .peer-checked-block {
         display: block;
     }
 </style>
+

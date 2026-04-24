@@ -99,15 +99,15 @@ body {
 		transform 0.1s ease,
 		box-shadow 0.1s ease,
 		background-color 0.2s ease;
-}
 
-@utility btn-brutal:hover {
-	background-color: #e65100;
-}
+	&:hover {
+		background-color: #e65100;
+	}
 
-@utility btn-brutal:active {
-	transform: translate(6px, 6px);
-	box-shadow: 0px 0px 0px #16181a;
+	&:active {
+		transform: translate(6px, 6px);
+		box-shadow: 0px 0px 0px #16181a;
+	}
 }
 
 @utility card-brutal {
@@ -119,16 +119,16 @@ body {
 
 @utility bg-grid {
 	position: relative;
-}
 
-@utility bg-grid::before {
-	content: "";
-	position: absolute;
-	inset: 0;
-	background-image: linear-gradient(#16181a 1px, transparent 1px),
-					  linear-gradient(90deg, #16181a 1px, transparent 1px);
-	background-size: 40px 40px;
-	opacity: 0.05;
-	z-index: -1;
-	pointer-events: none;
+	&::before {
+		content: "";
+		position: absolute;
+		inset: 0;
+		background-image: linear-gradient(#16181a 1px, transparent 1px),
+						  linear-gradient(90deg, #16181a 1px, transparent 1px);
+		background-size: 40px 40px;
+		opacity: 0.05;
+		z-index: -1;
+		pointer-events: none;
+	}
 }

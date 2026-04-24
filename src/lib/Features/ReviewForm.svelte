@@ -2,6 +2,7 @@
     import Input from "$lib/shared/ui/Input.svelte";
     import Button from "$lib/shared/ui/Button.svelte";
     import Turnstile from "$lib/shared/ui/Turnstile.svelte";
+    import Icon from "$lib/shared/ui/Icon.svelte";
 
     let userName = $state("");
     let rating = $state(5);
@@ -87,7 +88,7 @@
                                     aria-label="Оцінити на {star} зірок"
                                     disabled={isSubmitting}
                                 >
-                                    <i class="fa-solid fa-star"></i>
+                                    <Icon name="star" />
                                 </button>
                             {/each}
                         </div>

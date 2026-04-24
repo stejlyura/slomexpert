@@ -7,7 +7,7 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
-	<link rel="stylesheet" href="/fonts/fontawesome/css/all.min.css" />
 </svelte:head>
+
 
 {@render children()}

@@ -1,4 +1,5 @@
 <script>
+    import Icon from "../shared/ui/Icon.svelte";
     let { text = "", type = "positive" } = $props();
 </script>
 
@@ -7,10 +8,11 @@
 >
     <span class="text-xl mt-0.5 {type === 'positive' ? 'text-orange' : 'text-red-500'}">
         {#if type === 'positive'}
-            <i class="fa-solid fa-check"></i>
+            <Icon name="check" />
         {:else}
-            <i class="fa-solid fa-xmark"></i>
+            <Icon name="xmark" />
         {/if}
     </span>
     <span>{text}</span>
 </li>
+

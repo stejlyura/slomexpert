@@ -3,6 +3,7 @@
     import Select from "$lib/shared/ui/Select.svelte";
     import Checkbox from "$lib/shared/ui/Checkbox.svelte";
     import Turnstile from "$lib/shared/ui/Turnstile.svelte";
+    import Icon from "$lib/shared/ui/Icon.svelte";
 
     interface ServiceOption { value: number; label: string; }
     interface BaseRow { id: string; price: number; qty: number; }
@@ -155,7 +156,7 @@
             <!-- 1. Демонтаж -->
             <div class="p-6 bg-concrete border-4 border-tire">
                 <h3 class="font-heading font-bold text-xl mb-4 flex items-center gap-2 text-tire">
-                    <i class="fa-solid fa-hammer text-orange"></i> Основний демонтаж
+                    <Icon name="hammer" className="text-orange" /> Основний демонтаж
                 </h3>
                 {#each demolitions as item, i (item.id)}
                     <div class="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4 items-end {i > 0 ? 'pt-6 mt-6 border-t-2 border-dashed border-tire/20' : ''}">
@@ -182,20 +183,20 @@
                         </div>
                         {#if demolitions.length > 1}
                             <button type="button" class="shrink-0 w-12 h-12 flex items-center justify-center bg-red-100 text-red-600 border-2 border-red-600 cursor-pointer text-xl transition-colors duration-150 hover:bg-red-600 hover:text-white" onclick={() => demolitions = removeRow(demolitions, item.id)} title="Видалити" disabled={isSubmitting}>
-                                <i class="fa-solid fa-xmark"></i>
+                                <Icon name="xmark" />
                             </button>
                         {/if}
                     </div>
                 {/each}
                 <button type="button" class="mt-6 inline-flex items-center gap-2 font-sans font-bold text-sm uppercase text-orange bg-transparent border-none border-b-2 border-dashed border-orange pb-0.5 cursor-pointer transition-colors duration-150 hover:text-orange-hover" onclick={() => demolitions = addRow(demolitions, { price:0, qty:0 })} disabled={isSubmitting}>
-                    <i class="fa-solid fa-plus"></i> Додати ще демонтаж
+                    <Icon name="plus" /> Додати ще демонтаж
                 </button>
             </div>
 
             <!-- 2. Різання -->
             <div class="p-6 bg-concrete border-4 border-tire">
                 <h3 class="font-heading font-bold text-xl mb-4 flex items-center gap-2 text-tire">
-                    <i class="fa-solid fa-burst text-orange"></i> Алмазне різання
+                    <Icon name="burst" className="text-orange" /> Алмазне різання
                 </h3>
                 {#each cuttings as item, i (item.id)}
                     <div class="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4 items-end {i > 0 ? 'pt-6 mt-6 border-t-2 border-dashed border-tire/20' : ''}">
@@ -222,13 +223,13 @@
                         </div>
                         {#if cuttings.length > 1}
                             <button type="button" class="shrink-0 w-12 h-12 flex items-center justify-center bg-red-100 text-red-600 border-2 border-red-600 cursor-pointer text-xl transition-colors duration-150 hover:bg-red-600 hover:text-white" onclick={() => cuttings = removeRow(cuttings, item.id)} title="Видалити" disabled={isSubmitting}>
-                                <i class="fa-solid fa-xmark"></i>
+                                <Icon name="xmark" />
                             </button>
                         {/if}
                     </div>
                 {/each}
                 <button type="button" class="mt-6 inline-flex items-center gap-2 font-sans font-bold text-sm uppercase text-orange bg-transparent border-none border-b-2 border-dashed border-orange pb-0.5 cursor-pointer transition-colors duration-150 hover:text-orange-hover" onclick={() => cuttings = addRow(cuttings, { price:0, qty:0 })} disabled={isSubmitting}>
-                    <i class="fa-solid fa-plus"></i> Додати ще різку
+                    <Icon name="plus" /> Додати ще різку
                 </button>
             </div>
 
@@ -237,7 +238,7 @@
                 <!-- Свердління -->
                 <div class="p-6 bg-concrete border-4 border-tire">
                     <h3 class="font-heading font-bold text-lg mb-4 flex items-center gap-2 text-tire">
-                        <i class="fa-solid fa-circle-dot text-orange"></i> Алмазне свердління
+                        <Icon name="circle-dot" className="text-orange" /> Алмазне свердління
                     </h3>
                     {#each drillings as item, i (item.id)}
                         <div class="flex flex-col gap-4 {i > 0 ? 'pt-6 mt-6 border-t-2 border-dashed border-tire/20' : ''}">
@@ -276,21 +277,21 @@
                                 </div>
                                 {#if drillings.length > 1}
                                     <button type="button" class="shrink-0 w-11 h-11 flex items-center justify-center bg-red-100 text-red-600 border-2 border-red-600 cursor-pointer text-base transition-colors duration-150 hover:bg-red-600 hover:text-white" onclick={() => drillings = removeRow(drillings, item.id)} title="Видалити" disabled={isSubmitting}>
-                                        <i class="fa-solid fa-xmark"></i>
+                                        <Icon name="xmark" />
                                     </button>
                                 {/if}
                             </div>
                         </div>
                     {/each}
                     <button type="button" class="mt-6 inline-flex items-center gap-2 font-sans font-bold text-sm uppercase text-orange bg-transparent border-none border-b-2 border-dashed border-orange pb-0.5 cursor-pointer transition-colors duration-150 hover:text-orange-hover" onclick={() => drillings = addRow(drillings, { price:0, depth:0, qty:0 })} disabled={isSubmitting}>
-                        <i class="fa-solid fa-plus"></i> Додати ще отвори
+                        <Icon name="plus" /> Додати ще отвори
                     </button>
                 </div>
 
                 <!-- Підсилення -->
                 <div class="p-6 bg-concrete border-4 border-tire">
                     <h3 class="font-heading font-bold text-lg mb-4 flex items-center gap-2 text-tire">
-                        <i class="fa-solid fa-door-open text-orange"></i> Підсилення пройомів
+                        <Icon name="door-open" className="text-orange" /> Підсилення пройомів
                     </h3>
                     {#each reinforcements as item, i (item.id)}
                         <div class="flex flex-col gap-4 {i > 0 ? 'pt-6 mt-6 border-t-2 border-dashed border-tire/20' : ''}">
@@ -318,14 +319,14 @@
                                 </div>
                                 {#if reinforcements.length > 1}
                                     <button type="button" class="shrink-0 w-11 h-11 flex items-center justify-center bg-red-100 text-red-600 border-2 border-red-600 cursor-pointer text-base transition-colors duration-150 hover:bg-red-600 hover:text-white" onclick={() => reinforcements = removeRow(reinforcements, item.id)} title="Видалити" disabled={isSubmitting}>
-                                        <i class="fa-solid fa-xmark"></i>
+                                        <Icon name="xmark" />
                                     </button>
                                 {/if}
                             </div>
                         </div>
                     {/each}
                     <button type="button" class="mt-6 inline-flex items-center gap-2 font-sans font-bold text-sm uppercase text-orange bg-transparent border-none border-b-2 border-dashed border-orange pb-0.5 cursor-pointer transition-colors duration-150 hover:text-orange-hover" onclick={() => reinforcements = addRow(reinforcements, { price:0, qty:0 })} disabled={isSubmitting}>
-                        <i class="fa-solid fa-plus"></i> Додати ще підсилення
+                        <Icon name="plus" /> Додати ще підсилення
                     </button>
                 </div>
             </div>
@@ -333,7 +334,7 @@
             <!-- 4. Вивіз сміття -->
             <div class="p-6 bg-white border-4 border-orange">
                 <h3 class="font-heading font-bold text-xl mb-4 flex items-center gap-2 text-tire">
-                    <i class="fa-solid fa-truck-fast text-orange"></i> Вивезення сміття
+                    <Icon name="truck-fast" className="text-orange" /> Вивезення сміття
                 </h3>
                 <div class="flex justify-between items-center bg-concrete border-2 border-tire p-3 mb-4 transition-colors duration-200 cursor-default hover:border-orange">
                     <span class="font-bold text-[0.9rem] text-tire">Фасування в мішки (100 ₴ / шт)</span>
@@ -378,7 +379,7 @@
             <!-- Ваші контакти -->
             <div class="p-6 bg-concrete border-4 border-tire">
                 <h3 class="font-heading font-bold text-xl mb-4 flex items-center gap-2 text-tire">
-                    <i class="fa-solid fa-user text-orange"></i> Ваші контакти
+                    <Icon name="user" className="text-orange" /> Ваші контакти
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4 items-end">
                     <div class="flex flex-col w-full">

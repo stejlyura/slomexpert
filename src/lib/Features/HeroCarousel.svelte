@@ -1,20 +1,18 @@
 <script>
+    import Icon from "../shared/ui/Icon.svelte";
     let {
         slides = [
             {
                 title: "Знесення будівель",
-                emoji: "🏢💥",
-                bg: "var(--color-concrete)"
+                img: "/images/hero-1.png"
             },
             {
                 title: "Механізований демонтаж",
-                emoji: "🚜",
-                bg: "#D1D5DB" /* gray-300 */
+                img: "/images/hero-2.png"
             },
             {
                 title: "Ручний демонтаж квартир",
-                emoji: "🔨",
-                bg: "#9CA3AF" /* gray-400 */
+                img: "/images/hero-3.png"
             }
         ]
     } = $props();
@@ -36,16 +34,23 @@
     <div class="w-full overflow-hidden relative">
         <div class="flex transition-transform duration-500 ease-in-out w-full carousel-track">
             {#each slides as slide}
-                <div class="shrink-0 w-full h-[300px] md:h-[450px] flex flex-col items-center justify-center text-tire" style="background-color: {slide.bg}">
-                    <div class="text-center">
-                        <span class="text-6xl md:text-[6rem] mb-4 block">{slide.emoji}</span>
-                        <h3 class="font-heading font-bold text-2xl">{slide.title}</h3>
-                        <p class="font-mono text-sm mt-2 opacity-50">[Фото об'єкта]</p>
+                <div class="shrink-0 w-full h-[300px] md:h-[450px] relative flex flex-col items-center justify-center text-white overflow-hidden">
+                    <img 
+                        src={slide.img} 
+                        alt={slide.title} 
+                        class="absolute inset-0 w-full h-full object-cover grayscale-[0.5] contrast-125"
+                    />
+                    <div class="absolute inset-0 bg-tire/40"></div>
+                    <div class="relative z-10 text-center px-4">
+                        <h3 class="font-heading font-black text-3xl md:text-5xl uppercase tracking-tighter drop-shadow-brutal">
+                            {slide.title}
+                        </h3>
                     </div>
                 </div>
             {/each}
         </div>
     </div>
+
 
     <!-- Navigation Arrows -->
     <div class="absolute inset-0 pointer-events-none arrows">
@@ -54,10 +59,10 @@
             {@const next = i === slides.length - 1 ? 1 : i + 2}
             
             <label for="s{prev}" class="hidden absolute top-1/2 -translate-y-1/2 bg-orange text-white w-12 h-12 items-center justify-center cursor-pointer pointer-events-auto text-2xl transition-colors duration-100 hover:bg-orange-hover z-10 left-0 border-r-4 border-y-4 border-tire s{i + 1}-nav">
-                <i class="fa-solid fa-chevron-left"></i>
+                <Icon name="chevron-left" />
             </label>
             <label for="s{next}" class="hidden absolute top-1/2 -translate-y-1/2 bg-orange text-white w-12 h-12 items-center justify-center cursor-pointer pointer-events-auto text-2xl transition-colors duration-100 hover:bg-orange-hover z-10 right-0 border-l-4 border-y-4 border-tire s{i + 1}-nav">
-                <i class="fa-solid fa-chevron-right"></i>
+                <Icon name="chevron-right" />
             </label>
         {/each}
     </div>

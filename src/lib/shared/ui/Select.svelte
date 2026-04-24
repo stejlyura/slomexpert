@@ -1,4 +1,5 @@
 <script lang="ts">
+    import Icon from "./Icon.svelte";
     // Описуємо структуру для опцій
     export interface SelectOption {
         value: string | number;
@@ -44,6 +45,7 @@
         {/each}
     </select>
     <div class="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-tire text-[0.8rem] peer-focus:text-orange">
-        <i class="fa-solid fa-chevron-down"></i>
+        <Icon name="chevron-down" />
     </div>
 </div>
+

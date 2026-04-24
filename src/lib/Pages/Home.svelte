@@ -10,6 +10,38 @@
     import StepCard from "../Entities/StepCard.svelte";
     import MessengerBlock from "../Features/MessengerBlock.svelte";
     import ReviewForm from "../Features/ReviewForm.svelte";
+    import SEO from "../shared/seo/SEO.svelte";
+    import Icon from "../shared/ui/Icon.svelte";
+
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": "Slomexpert",
+        "image": "https://slomexpert.com/og-default.png",
+        "url": "https://slomexpert.com",
+        "telephone": "+380672158888",
+        "email": "info@slomexpert.ua",
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "вул. Будівельна, 10",
+            "addressLocality": "Київ",
+            "postalCode": "01001",
+            "addressCountry": "UA"
+        },
+        "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": 50.4501,
+            "longitude": 30.5234
+        },
+        "openingHoursSpecification": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": [
+                "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+            ],
+            "opens": "00:00",
+            "closes": "23:59"
+        }
+    };
 
     const services = [
         {
@@ -67,6 +99,14 @@
     ];
 </script>
 
+<SEO 
+    title="SLOMEXPERT - Професійний демонтаж в Україні | Знесення будівель"
+    description="Професійний демонтаж будівель, промислових об'єктів та квартир по всій Україні. Працюємо 24/7, фіксована ціна, повний вивіз сміття. Замовте безкоштовну оцінку!"
+    keywords="демонтаж, знесення будівель, промисловий демонтаж, квартирний демонтаж, вивіз сміття, Київ, Україна, Slomexpert"
+    canonical="https://slomexpert.com"
+    {jsonLd}
+/>
+
 <div class="min-h-screen bg-grid">
     <Header />
 
@@ -117,7 +157,7 @@
                     <!-- Competitors -->
                     <div class="flex-1 p-8 bg-concrete border-3 border-dashed border-steel opacity-80">
                         <div class="flex items-center gap-3 mb-6 pb-4 border-b-2 border-steel text-steel">
-                            <i class="fa-solid fa-face-frown text-3xl"></i>
+                            <Icon name="face-frown" className="text-3xl" />
                             <h3 class="font-heading font-bold text-2xl">Типові конкуренти</h3>
                         </div>
                         <ul class="flex flex-col gap-4 p-0">

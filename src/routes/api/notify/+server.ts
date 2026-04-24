@@ -8,7 +8,7 @@ import { z } from 'zod';
 const rateLimits = new Map<string, { count: number, resetAt: number }>();
 
 // Use secret from env or fallback to testing secret
-const TURNSTILE_SECRET = TURNSTILE_SECRET_KEY || '1x0000000000000000000000000000000AA'; 
+const TURNSTILE_SECRET = TURNSTILE_SECRET_KEY || '1x0000000000000000000000000000000AA';
 
 // --- SCHEMAS ---
 const contactSchema = z.object({
@@ -39,9 +39,9 @@ const reviewSchema = z.object({
 /**
  * Basic HTML sanitization for Telegram HTML mode
  */
-function sanitize(str: string | undefined | null): string {
-    if (!str) return '';
-    return String(str)
+function sanitize(val: string | number | undefined | null): string {
+    if (val === undefined || val === null || val === '') return '';
+    return String(val)
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
@@ -49,7 +49,7 @@ function sanitize(str: string | undefined | null): string {
 
 async function verifyTurnstile(token: string | undefined) {
     if (!token) return false;
-    
+
     const formData = new FormData();
     formData.append('secret', TURNSTILE_SECRET);
     formData.append('response', token);
@@ -87,16 +87,16 @@ export const POST: RequestHandler = async ({ request, cookies, getClientAddress 
 
         if (limit && now < limit.resetAt) {
             if (limit.count >= 5) {
-                return json({ 
-                    success: false, 
-                    error: 'Занадто багато запитів з вашої IP-адреси. Спробуйте пізніше.' 
+                return json({
+                    success: false,
+                    error: 'Занадто багато запитів з вашої IP-адреси. Спробуйте пізніше.'
                 }, { status: 429 });
             }
             limit.count++;
         } else {
-            rateLimits.set(clientIp, { 
-                count: 1, 
-                resetAt: now + (24 * 60 * 60 * 1000) 
+            rateLimits.set(clientIp, {
+                count: 1,
+                resetAt: now + (24 * 60 * 60 * 1000)
             });
         }
 
@@ -113,13 +113,13 @@ export const POST: RequestHandler = async ({ request, cookies, getClientAddress 
         if (type === 'contact') {
             const validated = contactSchema.safeParse(data);
             if (!validated.success) return json({ success: false, error: 'Invalid data' }, { status: 400 });
-            
+
             const { name, phone, message: msg } = validated.data;
             message = `<b>🔔 Нова заявка на зворотній дзвінок</b>\n\n`;
             message += `👤 <b>Ім'я:</b> ${sanitize(name)}\n`;
             message += `📞 <b>Телефон:</b> <code>${sanitize(phone)}</code>\n`;
             if (msg) message += `💬 <b>Повідомлення:</b> ${sanitize(msg)}\n`;
-        } 
+        }
         else if (type === 'configurator') {
             const validated = configuratorSchema.safeParse(data);
             if (!validated.success) return json({ success: false, error: 'Invalid data' }, { status: 400 });
@@ -129,14 +129,14 @@ export const POST: RequestHandler = async ({ request, cookies, getClientAddress 
             message += `👤 <b>Клієнт:</b> ${sanitize(userName)}\n`;
             message += `📞 <b>Телефон:</b> <code>${sanitize(userPhone)}</code>\n`;
             message += `💰 <b>Попередня сума:</b> ${sanitize(totalPrice)} ₴\n\n`;
-            
+
             if (details && details.length > 0) {
                 message += `📋 <b>Обрані послуги:</b>\n`;
                 details.forEach((item) => {
                     message += `• ${sanitize(item.label)}: ${sanitize(item.qty)} шт/м\n`;
                 });
             }
-        } 
+        }
         else if (type === 'review') {
             const validated = reviewSchema.safeParse(data);
             if (!validated.success) return json({ success: false, error: 'Invalid data' }, { status: 400 });
@@ -146,14 +146,14 @@ export const POST: RequestHandler = async ({ request, cookies, getClientAddress 
             message += `👤 <b>Від:</b> ${sanitize(name)}\n`;
             message += `🌟 <b>Оцінка:</b> ${sanitize(rating)} / 5\n`;
             message += `📝 <b>Коментар:</b> ${sanitize(comment)}\n`;
-        } 
+        }
         else {
             return json({ success: false, error: 'Unknown form type' }, { status: 400 });
         }
 
         const url = `https://api.telegram.org/bot${TELEGRAM_API}/sendMessage`;
         const userIds = USER_ID.split(',').map(id => id.trim());
-        
+
         const sendPromises = userIds.map(async (chatId) => {
             const response = await fetch(url, {
                 method: 'POST',
