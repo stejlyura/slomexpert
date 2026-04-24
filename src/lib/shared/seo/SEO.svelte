@@ -11,7 +11,7 @@
     } = $props();
 
     const siteName = "Slomexpert";
-    const twitterHandle = "@yourhandle";
+    const twitterHandle = "@slomexpert";
 </script>
 
 <svelte:head>

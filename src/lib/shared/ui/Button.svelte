@@ -34,7 +34,7 @@
 {/if}
 
 <style>
-    /* btn-brutal is defined in base.css, but we can override or add specifics here if needed */
+    /* Base styles are defined in layout.css @theme and @utility */
     .btn-brutal {
         /* Ensuring base styles are applied if not globally loaded yet */
         text-transform: uppercase;

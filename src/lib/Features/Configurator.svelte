@@ -1,4 +1,14 @@
 <script lang="ts">
+    import Input from "$lib/shared/ui/Input.svelte";
+    import Select from "$lib/shared/ui/Select.svelte";
+    import Turnstile from "$lib/shared/ui/Turnstile.svelte";
+    import Icon from "$lib/shared/ui/Icon.svelte";
+    import FeedbackMessage from "$lib/shared/ui/FeedbackMessage.svelte";
+
+    import ServiceBlock from "./Configurator/ServiceBlock.svelte";
+    import TruckSelector from "./Configurator/TruckSelector.svelte";
+    import PriceSummary from "./Configurator/PriceSummary.svelte";
+
     interface ServiceOption { value: number; label: string; }
     interface BaseRow { id: string; price: number; qty: number; }
     interface DrillingRow extends BaseRow { depth: number; }
@@ -35,12 +45,24 @@
         { value: 17500, label: "В цеглі (2100x900, кутники по периметру) - 17500 ₴" },
     ];
 
+    import { formatUkrainianPhone } from "$lib/shared/utils/phone";
+
     let demolitions: BaseRow[]    = $state([{ id: uid(), price: 0, qty: 0 }]);
     let cuttings: BaseRow[]       = $state([{ id: uid(), price: 0, qty: 0 }]);
     let drillings: DrillingRow[]  = $state([{ id: uid(), price: 0, depth: 0, qty: 0 }]);
     let reinforcements: BaseRow[] = $state([{ id: uid(), price: 0, qty: 0 }]);
     let trashBags: number = $state(0);
     let truckPrice: number = $state(0);
+    let userName: string = $state("");
+    let userPhone: string = $state("");
+
+    function handlePhoneInput(e: Event) {
+        const input = e.target as HTMLInputElement;
+        userPhone = formatUkrainianPhone(input.value);
+    }
+    let turnstileToken: string = $state("");
+    let websiteUrl: string = $state(""); // Honeypot
+    let turnstileComponent: any = $state();
 
     function addRow<T extends { id: string }>(arr: T[], fields: Omit<T, "id">): T[] {
         return [...arr, { id: uid(), ...fields } as T];
@@ -58,489 +80,324 @@
     );
     let formattedTotal = $derived(totalSum.toLocaleString("uk-UA"));
 
-    function handleSubmit(e: Event) {
+    let isSubmitting = $state(false);
+    let feedback = $state({ message: "", type: "" });
+
+    async function handleSubmit(e: Event) {
         e.preventDefault();
-        alert(`Ціну зафіксовано: ${formattedTotal} ₴. Наш менеджер зв'яжеться з вами.`);
+
+        if (userName.trim().length < 2) {
+            feedback = { message: "Будь ласка, введіть коректне ім'я (мінімум 2 символи).", type: "error" };
+            return;
+        }
+
+        if (!turnstileToken) {
+            feedback = { message: "Будь ласка, підтвердіть, що ви не робот.", type: "error" };
+            return;
+        }
+
+        isSubmitting = true;
+        feedback = { message: "", type: "" };
+
+        const details: any[] = [];
+        demolitions.filter(r => r.price > 0 && r.qty > 0).forEach(r => {
+            details.push({ label: demolitionOptions.find(o => o.value === r.price)?.label, qty: r.qty });
+        });
+        cuttings.filter(r => r.price > 0 && r.qty > 0).forEach(r => {
+            details.push({ label: cuttingOptions.find(o => o.value === r.price)?.label, qty: r.qty });
+        });
+        drillings.filter(r => r.price > 0 && r.depth > 0 && r.qty > 0).forEach(r => {
+            details.push({ label: `${drillingOptions.find(o => o.value === r.price)?.label} (гл. ${r.depth}см)`, qty: r.qty });
+        });
+        reinforcements.filter(r => r.price > 0 && r.qty > 0).forEach(r => {
+            details.push({ label: reinforcementOptions.find(o => o.value === r.price)?.label, qty: r.qty });
+        });
+        if (trashBags > 0) details.push({ label: "Мішки для сміття", qty: trashBags });
+        if (truckPrice > 0) details.push({ label: truckPrice === 2500 ? "ЗІЛ 5т" : "КАМАЗ 10т", qty: 1 });
+
+        try {
+            const response = await fetch('/api/notify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'configurator',
+                    website_url: websiteUrl,
+                    data: {
+                        userName,
+                        userPhone,
+                        totalPrice: formattedTotal,
+                        details,
+                        turnstileToken
+                    }
+                })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                feedback = { message: "Розрахунок зафіксовано! Очікуйте на дзвінок менеджера.", type: "success" };
+                // Reset basic info
+                userName = "";
+                userPhone = "";
+                websiteUrl = "";
+                turnstileToken = "";
+                turnstileComponent?.reset();
+            } else {
+                feedback = { message: result.error || "Помилка відправки. Спробуйте пізніше.", type: "error" };
+                turnstileComponent?.reset();
+            }
+        } catch (err) {
+            feedback = { message: "Сервер недоступний. Перевірте мережу.", type: "error" };
+        } finally {
+            isSubmitting = false;
+        }
     }
 </script>
 
-<section id="calculator" class="calc-section">
-    <div class="calc-bg-pattern"></div>
+<section id="calculator" class="py-20 px-4 bg-tire relative overflow-hidden">
+    <div class="absolute inset-0 z-0 opacity-10 [background:repeating-linear-gradient(45deg,#FF5A00,#FF5A00_40px,#16181A_40px,#16181A_80px)] pointer-events-none"></div>
 
-    <div class="calc-card">
-        <h2 class="calc-title">Прайс-Калькулятор</h2>
-        <p class="calc-subtitle">
+    <div class="relative z-10 max-w-5xl mx-auto bg-white border-4 border-orange shadow-brutal p-8 md:p-12">
+        <h2 class="font-heading font-black text-3xl md:text-5xl uppercase text-center mb-2 text-tire">Прайс-Калькулятор</h2>
+        <p class="text-center font-semibold text-steel mb-8">
             Оберіть послуги згідно з нашим прайсом. Ви можете додавати декілька позицій в кожному блоці.
         </p>
 
-        <form onsubmit={handleSubmit} class="calc-form">
+        <form onsubmit={handleSubmit} class="flex flex-col gap-6">
+            <!-- Honeypot field -->
+            <div class="absolute -left-[9999px] -top-[9999px] opacity-0 pointer-events-none" aria-hidden="true">
+                <input type="text" name="website_url" bind:value={websiteUrl} tabindex="-1" autocomplete="off" />
+            </div>
 
             <!-- 1. Демонтаж -->
-            <div class="calc-block">
-                <h3 class="calc-block-title">
-                    <i class="fa-solid fa-hammer icon-orange"></i> Основний демонтаж
-                </h3>
-                {#each demolitions as item, i (item.id)}
-                    <div class="row-grid {i > 0 ? 'row-separator' : ''}">
-                        <div class="field-wrap">
-                            <label class="field-label" for="dem-type-{item.id}">Вид робіт</label>
-                            <div class="select-wrap">
-                                <select id="dem-type-{item.id}" class="c-select" bind:value={item.price}>
-                                    <option value={0}>Оберіть послугу...</option>
-                                    {#each demolitionOptions as o}<option value={o.value}>{o.label}</option>{/each}
-                                </select>
-                                <span class="select-arrow"><i class="fa-solid fa-chevron-down"></i></span>
-                            </div>
+            <ServiceBlock 
+                title="Основний демонтаж" 
+                icon="hammer" 
+                items={demolitions} 
+                addButtonText="Додати ще демонтаж" 
+                isSubmitting={isSubmitting}
+                onAdd={() => demolitions = addRow(demolitions, { price:0, qty:0 })}
+            >
+                {#snippet children(item)}
+                    <div class="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4 items-end">
+                        <div class="flex flex-col w-full">
+                            <label class="font-bold text-sm mb-2 text-tire" for="dem-type-{item.id}">Вид робіт</label>
+                            <Select 
+                                id="dem-type-{item.id}" 
+                                bind:value={item.price} 
+                                options={demolitionOptions} 
+                                placeholder="Оберіть послугу..." 
+                                disabled={isSubmitting} 
+                            />
                         </div>
-                        <div class="field-wrap">
-                            <label class="field-label" for="dem-qty-{item.id}">Площа (м²) або Кількість (шт)</label>
-                            <input id="dem-qty-{item.id}" type="number" min="0" class="c-input" placeholder="0" bind:value={item.qty} />
+                        <div class="flex flex-col w-full">
+                            <label class="font-bold text-sm mb-2 text-tire" for="dem-qty-{item.id}">Площа (м²) або Кількість (шт)</label>
+                            <Input 
+                                id="dem-qty-{item.id}" 
+                                type="number" 
+                                min="0" 
+                                placeholder="0" 
+                                bind:value={item.qty} 
+                                disabled={isSubmitting} 
+                            />
                         </div>
                         {#if demolitions.length > 1}
-                            <button type="button" class="btn-remove" onclick={() => demolitions = removeRow(demolitions, item.id)} title="Видалити">
-                                <i class="fa-solid fa-xmark"></i>
+                            <button type="button" class="shrink-0 w-12 h-12 flex items-center justify-center bg-red-100 text-red-600 border-2 border-red-600 cursor-pointer text-xl transition-colors duration-150 hover:bg-red-600 hover:text-white" onclick={() => demolitions = removeRow(demolitions, item.id)} title="Видалити" disabled={isSubmitting}>
+                                <Icon name="xmark" />
                             </button>
                         {/if}
                     </div>
-                {/each}
-                <button type="button" class="btn-add" onclick={() => demolitions = addRow(demolitions, { price:0, qty:0 })}>
-                    <i class="fa-solid fa-plus"></i> Додати ще демонтаж
-                </button>
-            </div>
+                {/snippet}
+            </ServiceBlock>
 
             <!-- 2. Різання -->
-            <div class="calc-block">
-                <h3 class="calc-block-title">
-                    <i class="fa-solid fa-burst icon-orange"></i> Алмазне різання
-                </h3>
-                {#each cuttings as item, i (item.id)}
-                    <div class="row-grid {i > 0 ? 'row-separator' : ''}">
-                        <div class="field-wrap">
-                            <label class="field-label" for="cut-type-{item.id}">Тип матеріалу</label>
-                            <div class="select-wrap">
-                                <select id="cut-type-{item.id}" class="c-select" bind:value={item.price}>
-                                    <option value={0}>Оберіть послугу...</option>
-                                    {#each cuttingOptions as o}<option value={o.value}>{o.label}</option>{/each}
-                                </select>
-                                <span class="select-arrow"><i class="fa-solid fa-chevron-down"></i></span>
-                            </div>
+            <ServiceBlock 
+                title="Алмазне різання" 
+                icon="burst" 
+                items={cuttings} 
+                addButtonText="Додати ще різку" 
+                isSubmitting={isSubmitting}
+                onAdd={() => cuttings = addRow(cuttings, { price:0, qty:0 })}
+            >
+                {#snippet children(item)}
+                    <div class="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4 items-end">
+                        <div class="flex flex-col w-full">
+                            <label class="font-bold text-sm mb-2 text-tire" for="cut-type-{item.id}">Тип матеріалу</label>
+                            <Select 
+                                id="cut-type-{item.id}" 
+                                bind:value={item.price} 
+                                options={cuttingOptions} 
+                                placeholder="Оберіть послугу..." 
+                                disabled={isSubmitting} 
+                            />
                         </div>
-                        <div class="field-wrap">
-                            <label class="field-label" for="cut-qty-{item.id}">Довжина (м.п.) або Кількість (шт)</label>
-                            <input id="cut-qty-{item.id}" type="number" min="0" class="c-input" placeholder="0" bind:value={item.qty} />
+                        <div class="flex flex-col w-full">
+                            <label class="font-bold text-sm mb-2 text-tire" for="cut-qty-{item.id}">Довжина (м.п.) або Кількість (шт)</label>
+                            <Input 
+                                id="cut-qty-{item.id}" 
+                                type="number" 
+                                min="0" 
+                                placeholder="0" 
+                                bind:value={item.qty} 
+                                disabled={isSubmitting} 
+                            />
                         </div>
                         {#if cuttings.length > 1}
-                            <button type="button" class="btn-remove" onclick={() => cuttings = removeRow(cuttings, item.id)} title="Видалити">
-                                <i class="fa-solid fa-xmark"></i>
+                            <button type="button" class="shrink-0 w-12 h-12 flex items-center justify-center bg-red-100 text-red-600 border-2 border-red-600 cursor-pointer text-xl transition-colors duration-150 hover:bg-red-600 hover:text-white" onclick={() => cuttings = removeRow(cuttings, item.id)} title="Видалити" disabled={isSubmitting}>
+                                <Icon name="xmark" />
                             </button>
                         {/if}
                     </div>
-                {/each}
-                <button type="button" class="btn-add" onclick={() => cuttings = addRow(cuttings, { price:0, qty:0 })}>
-                    <i class="fa-solid fa-plus"></i> Додати ще різку
-                </button>
-            </div>
+                {/snippet}
+            </ServiceBlock>
 
             <!-- 3. Свердління + Підсилення -->
-            <div class="two-col-grid">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Свердління -->
-                <div class="calc-block">
-                    <h3 class="calc-block-title" style="font-size:1rem;">
-                        <i class="fa-solid fa-circle-dot icon-orange"></i> Алмазне свердління
-                    </h3>
-                    {#each drillings as item, i (item.id)}
-                        <div class="drill-group {i > 0 ? 'row-separator' : ''}">
-                            <div class="field-wrap">
-                                <label class="field-label" for="dr-type-{item.id}">Діаметр коронки</label>
-                                <div class="select-wrap">
-                                    <select id="dr-type-{item.id}" class="c-select" bind:value={item.price}>
-                                        <option value={0}>Оберіть...</option>
-                                        {#each drillingOptions as o}<option value={o.value}>{o.label}</option>{/each}
-                                    </select>
-                                    <span class="select-arrow"><i class="fa-solid fa-chevron-down"></i></span>
-                                </div>
+                <ServiceBlock 
+                    title="Алмазне свердління" 
+                    icon="circle-dot" 
+                    items={drillings} 
+                    addButtonText="Додати ще отвори" 
+                    isSubmitting={isSubmitting}
+                    onAdd={() => drillings = addRow(drillings, { price:0, depth:0, qty:0 })}
+                >
+                    {#snippet children(item)}
+                        <div class="flex flex-col gap-4">
+                            <div class="flex flex-col w-full">
+                                <label class="font-bold text-sm mb-2 text-tire" for="dr-type-{item.id}">Діаметр коронки</label>
+                                <Select 
+                                    id="dr-type-{item.id}" 
+                                    bind:value={item.price} 
+                                    options={drillingOptions} 
+                                    placeholder="Оберіть..." 
+                                    disabled={isSubmitting} 
+                                />
                             </div>
-                            <div class="row-inline">
-                                <div class="field-wrap">
-                                    <label class="field-label field-label-xs" for="dr-depth-{item.id}">Глибина (см)</label>
-                                    <input id="dr-depth-{item.id}" type="number" min="0" class="c-input" placeholder="0" bind:value={item.depth} />
+                            <div class="flex gap-2 items-end">
+                                <div class="flex flex-col w-full">
+                                    <label class="font-bold text-[0.75rem] mb-2 text-tire" for="dr-depth-{item.id}">Глибина (см)</label>
+                                    <Input 
+                                        id="dr-depth-{item.id}" 
+                                        type="number" 
+                                        min="0" 
+                                        placeholder="0" 
+                                        bind:value={item.depth} 
+                                        disabled={isSubmitting} 
+                                    />
                                 </div>
-                                <div class="field-wrap">
-                                    <label class="field-label field-label-xs" for="dr-qty-{item.id}">К-сть (шт)</label>
-                                    <input id="dr-qty-{item.id}" type="number" min="0" class="c-input" placeholder="0" bind:value={item.qty} />
+                                <div class="flex flex-col w-full">
+                                    <label class="font-bold text-[0.75rem] mb-2 text-tire" for="dr-qty-{item.id}">К-сть (шт)</label>
+                                    <Input 
+                                        id="dr-qty-{item.id}" 
+                                        type="number" 
+                                        min="0" 
+                                        placeholder="0" 
+                                        bind:value={item.qty} 
+                                        disabled={isSubmitting} 
+                                    />
                                 </div>
                                 {#if drillings.length > 1}
-                                    <button type="button" class="btn-remove btn-remove-sm" onclick={() => drillings = removeRow(drillings, item.id)} title="Видалити">
-                                        <i class="fa-solid fa-xmark"></i>
+                                    <button type="button" class="shrink-0 w-11 h-11 flex items-center justify-center bg-red-100 text-red-600 border-2 border-red-600 cursor-pointer text-base transition-colors duration-150 hover:bg-red-600 hover:text-white" onclick={() => drillings = removeRow(drillings, item.id)} title="Видалити" disabled={isSubmitting}>
+                                        <Icon name="xmark" />
                                     </button>
                                 {/if}
                             </div>
                         </div>
-                    {/each}
-                    <button type="button" class="btn-add" onclick={() => drillings = addRow(drillings, { price:0, depth:0, qty:0 })}>
-                        <i class="fa-solid fa-plus"></i> Додати ще отвори
-                    </button>
-                </div>
+                    {/snippet}
+                </ServiceBlock>
 
                 <!-- Підсилення -->
-                <div class="calc-block">
-                    <h3 class="calc-block-title" style="font-size:1rem;">
-                        <i class="fa-solid fa-door-open icon-orange"></i> Підсилення пройомів
-                    </h3>
-                    {#each reinforcements as item, i (item.id)}
-                        <div class="drill-group {i > 0 ? 'row-separator' : ''}">
-                            <div class="field-wrap">
-                                <label class="field-label" for="re-type-{item.id}">Конструкція підсилення</label>
-                                <div class="select-wrap">
-                                    <select id="re-type-{item.id}" class="c-select" bind:value={item.price}>
-                                        <option value={0}>Оберіть...</option>
-                                        {#each reinforcementOptions as o}<option value={o.value}>{o.label}</option>{/each}
-                                    </select>
-                                    <span class="select-arrow"><i class="fa-solid fa-chevron-down"></i></span>
-                                </div>
+                <ServiceBlock 
+                    title="Підсилення пройомів" 
+                    icon="door-open" 
+                    items={reinforcements} 
+                    addButtonText="Додати ще підсилення" 
+                    isSubmitting={isSubmitting}
+                    onAdd={() => reinforcements = addRow(reinforcements, { price:0, qty:0 })}
+                >
+                    {#snippet children(item)}
+                        <div class="flex flex-col gap-4">
+                            <div class="flex flex-col w-full">
+                                <label class="font-bold text-sm mb-2 text-tire" for="re-type-{item.id}">Конструкція підсилення</label>
+                                <Select 
+                                    id="re-type-{item.id}" 
+                                    bind:value={item.price} 
+                                    options={reinforcementOptions} 
+                                    placeholder="Оберіть..." 
+                                    disabled={isSubmitting} 
+                                />
                             </div>
-                            <div class="row-inline">
-                                <div class="field-wrap" style="flex:1;">
-                                    <label class="field-label field-label-xs" for="re-qty-{item.id}">Кількість пройомів (шт)</label>
-                                    <input id="re-qty-{item.id}" type="number" min="0" class="c-input" placeholder="0" bind:value={item.qty} />
+                            <div class="flex gap-2 items-end">
+                                <div class="flex flex-col w-full">
+                                    <label class="font-bold text-[0.75rem] mb-2 text-tire" for="re-qty-{item.id}">Кількість пройомів (шт)</label>
+                                    <Input 
+                                        id="re-qty-{item.id}" 
+                                        type="number" 
+                                        min="0" 
+                                        placeholder="0" 
+                                        bind:value={item.qty} 
+                                        disabled={isSubmitting} 
+                                    />
                                 </div>
                                 {#if reinforcements.length > 1}
-                                    <button type="button" class="btn-remove btn-remove-sm" onclick={() => reinforcements = removeRow(reinforcements, item.id)} title="Видалити">
-                                        <i class="fa-solid fa-xmark"></i>
+                                    <button type="button" class="shrink-0 w-11 h-11 flex items-center justify-center bg-red-100 text-red-600 border-2 border-red-600 cursor-pointer text-base transition-colors duration-150 hover:bg-red-600 hover:text-white" onclick={() => reinforcements = removeRow(reinforcements, item.id)} title="Видалити" disabled={isSubmitting}>
+                                        <Icon name="xmark" />
                                     </button>
                                 {/if}
                             </div>
                         </div>
-                    {/each}
-                    <button type="button" class="btn-add" onclick={() => reinforcements = addRow(reinforcements, { price:0, qty:0 })}>
-                        <i class="fa-solid fa-plus"></i> Додати ще підсилення
-                    </button>
-                </div>
+                    {/snippet}
+                </ServiceBlock>
             </div>
 
             <!-- 4. Вивіз сміття -->
-            <div class="calc-block calc-block--orange">
-                <h3 class="calc-block-title">
-                    <i class="fa-solid fa-truck-fast icon-orange"></i> Вивезення сміття
+            <TruckSelector bind:trashBags bind:truckPrice {isSubmitting} />
+
+            <!-- Ваші контакти -->
+            <div class="p-6 bg-concrete border-4 border-tire">
+                <h3 class="font-heading font-bold text-xl mb-4 flex items-center gap-2 text-tire">
+                    <Icon name="user" className="text-orange" /> Ваші контакти
                 </h3>
-                <div class="trash-label">
-                    <span class="trash-label-text">Фасування в мішки (100 ₴ / шт)</span>
-                    <input
-                        id="trashBags"
-                        type="number"
-                        min="0"
-                        class="c-input trash-input"
-                        placeholder="0 шт"
-                        bind:value={trashBags}
-                    />
-                </div>
-                <div class="truck-grid">
-                    <label class="truck-option {truckPrice === 0 ? 'truck-option--active' : ''}">
-                        <input type="radio" name="truck" value="0" class="hidden-radio" onclick={() => truckPrice = 0} /> Без машини
-                    </label>
-                    <label class="truck-option {truckPrice === 2500 ? 'truck-option--active' : ''}">
-                        <input type="radio" name="truck" value="2500" class="hidden-radio" onclick={() => truckPrice = 2500} /> ЗІЛ 5т (+2500 ₴)
-                    </label>
-                    <label class="truck-option {truckPrice === 4500 ? 'truck-option--active' : ''}">
-                        <input type="radio" name="truck" value="4500" class="hidden-radio" onclick={() => truckPrice = 4500} /> КАМАЗ 10т (+4500 ₴)
-                    </label>
+                <div class="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4 items-end">
+                    <div class="flex flex-col w-full">
+                        <label class="font-bold text-sm mb-2 text-tire" for="user-name">Ваше ім'я</label>
+                        <Input 
+                            id="user-name" 
+                            placeholder="Олександр" 
+                            bind:value={userName} 
+                            required 
+                            minlength={2}
+                            maxlength={50}
+                            disabled={isSubmitting} 
+                        />
+                    </div>
+                    <div class="flex flex-col w-full">
+                        <label class="font-bold text-sm mb-2 text-tire" for="user-phone">Номер телефону</label>
+                        <Input 
+                            id="user-phone" 
+                            type="tel" 
+                            placeholder="+38 (0XX) XXX-XX-XX" 
+                            bind:value={userPhone}
+                            required 
+                            disabled={isSubmitting} 
+                            pattern="^\+38\s\(0\d{2}\)\s\d{3}-\d{2}-\d{2}$"
+                            inputmode="tel"
+                            oninput={handlePhoneInput}
+                        />
+                    </div>
                 </div>
             </div>
 
             <!-- Підсумок -->
-            <div class="calc-summary">
-                <div class="summary-total">
-                    <p class="summary-label">Загальна сума згідно з прайсом:</p>
-                    <div class="summary-price">
-                        <span id="totalPrice">{formattedTotal}</span>
-                        <span class="summary-currency">₴</span>
-                    </div>
-                </div>
-                <button type="submit" class="btn-submit">ЗАФІКСУВАТИ ЦІНУ</button>
-            </div>
+            <PriceSummary 
+                formattedTotal={formattedTotal} 
+                isSubmitting={isSubmitting} 
+                bind:turnstileComponent 
+                onVerify={(token) => turnstileToken = token} 
+            />
+
+            <FeedbackMessage message={feedback.message} type={feedback.type as "success" | "error"} />
         </form>
     </div>
 </section>
-
-<style>
-    /* ── Section ── */
-    .calc-section {
-        padding: 5rem 1rem;
-        background-color: var(--color-tire);
-        position: relative;
-        overflow: hidden;
-    }
-    .calc-bg-pattern {
-        position: absolute;
-        inset: 0;
-        z-index: 0;
-        opacity: 0.1;
-        background: repeating-linear-gradient(45deg, #FF5A00, #FF5A00 40px, #16181A 40px, #16181A 80px);
-        pointer-events: none;
-    }
-
-    /* ── Card ── */
-    .calc-card {
-        position: relative;
-        z-index: 10;
-        max-width: 64rem;
-        margin: 0 auto;
-        background: var(--color-white);
-        border: 4px solid var(--color-orange);
-        box-shadow: 8px 8px 0 var(--color-tire);
-        padding: 2rem;
-    }
-    @media (min-width: 768px) {
-        .calc-card { padding: 3rem; }
-    }
-
-    /* ── Heading ── */
-    .calc-title {
-        font-family: var(--font-heading);
-        font-weight: 900;
-        font-size: clamp(1.75rem, 4vw, 2.5rem);
-        text-transform: uppercase;
-        text-align: center;
-        margin: 0 0 0.5rem;
-        color: var(--color-tire);
-    }
-    .calc-subtitle {
-        text-align: center;
-        font-weight: 600;
-        color: var(--color-steel);
-        margin: 0 0 2rem;
-    }
-
-    /* ── Form ── */
-    .calc-form { display: flex; flex-direction: column; gap: 1.5rem; }
-
-    /* ── Block ── */
-    .calc-block {
-        padding: 1.5rem;
-        background-color: var(--color-concrete);
-        border: 4px solid var(--color-tire);
-    }
-    .calc-block--orange {
-        background-color: var(--color-white);
-        border-color: var(--color-orange);
-    }
-    .calc-block-title {
-        font-family: var(--font-heading);
-        font-weight: 700;
-        font-size: 1.25rem;
-        margin: 0 0 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: var(--color-tire);
-    }
-    .icon-orange { color: var(--color-orange); }
-
-    /* ── Two-column layout ── */
-    .two-col-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
-    @media (min-width: 1024px) {
-        .two-col-grid { grid-template-columns: 1fr 1fr; }
-    }
-
-    /* ── Row grid (1fr 1fr auto) ── */
-    .row-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 1rem;
-        align-items: end;
-    }
-    @media (min-width: 768px) {
-        .row-grid { grid-template-columns: 1fr 1fr auto; }
-    }
-    .row-separator {
-        padding-top: 1.5rem;
-        margin-top: 1.5rem;
-        border-top: 2px dashed rgba(22,24,26,0.2);
-    }
-
-    /* ── Drilling group ── */
-    .drill-group { display: flex; flex-direction: column; gap: 1rem; }
-    .row-inline { display: flex; gap: 0.5rem; align-items: flex-end; }
-
-    /* ── Field ── */
-    .field-wrap { display: flex; flex-direction: column; width: 100%; }
-    .field-label {
-        font-weight: 700;
-        font-size: 0.875rem;
-        margin-bottom: 0.5rem;
-        color: var(--color-tire);
-    }
-    .field-label-xs { font-size: 0.75rem; }
-
-    /* ── Select ── */
-    .select-wrap { position: relative; width: 100%; }
-    .c-select {
-        width: 100%;
-        background: var(--color-white);
-        border: 2px solid var(--color-tire);
-        padding: 0.75rem 2.5rem 0.75rem 0.75rem;
-        font-family: var(--font-sans);
-        font-weight: 700;
-        font-size: 0.875rem;
-        outline: none;
-        cursor: pointer;
-        appearance: none;
-        -webkit-appearance: none;
-        transition: border-color 0.2s;
-        color: var(--color-tire);
-    }
-    .c-select:focus { border-color: var(--color-orange); box-shadow: 4px 4px 0 var(--color-tire); }
-    .select-arrow {
-        position: absolute;
-        right: 0.75rem;
-        top: 50%;
-        transform: translateY(-50%);
-        pointer-events: none;
-        font-size: 0.7rem;
-        color: var(--color-tire);
-    }
-
-    /* ── Input ── */
-    .c-input {
-        width: 100%;
-        background: var(--color-white);
-        border: 2px solid var(--color-tire);
-        padding: 0.75rem;
-        font-family: var(--font-sans);
-        font-weight: 700;
-        outline: none;
-        transition: border-color 0.2s;
-        color: var(--color-tire);
-        box-sizing: border-box;
-    }
-    .c-input:focus { border-color: var(--color-orange); box-shadow: 4px 4px 0 var(--color-tire); }
-    .c-input::placeholder { color: var(--color-steel); opacity: 0.7; }
-
-    /* ── Buttons ── */
-    .btn-add {
-        margin-top: 1.5rem;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-family: var(--font-sans);
-        font-weight: 700;
-        font-size: 0.875rem;
-        text-transform: uppercase;
-        color: var(--color-orange);
-        background: none;
-        border: none;
-        border-bottom: 2px dashed var(--color-orange);
-        padding-bottom: 2px;
-        cursor: pointer;
-        transition: color 0.15s;
-    }
-    .btn-add:hover { color: var(--color-orange-hover); }
-
-    .btn-remove {
-        flex-shrink: 0;
-        width: 3rem;
-        height: 3rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #fee2e2;
-        color: #dc2626;
-        border: 2px solid #dc2626;
-        cursor: pointer;
-        font-size: 1.25rem;
-        transition: background 0.15s, color 0.15s;
-    }
-    .btn-remove:hover { background: #dc2626; color: #fff; }
-    .btn-remove-sm { width: 2.75rem; height: 2.75rem; font-size: 1rem; }
-
-    /* ── Trash block ── */
-    .trash-label {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background: var(--color-concrete);
-        border: 2px solid var(--color-tire);
-        padding: 0.75rem;
-        margin-bottom: 1rem;
-        transition: border-color 0.2s;
-        cursor: default;
-    }
-    .trash-label:hover { border-color: var(--color-orange); }
-    .trash-label-text { font-weight: 700; font-size: 0.9rem; color: var(--color-tire); }
-    .trash-input { width: 6rem; text-align: center; height: 2.5rem; padding: 0.25rem 0.5rem; }
-
-    /* ── Truck options ── */
-    .truck-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 0.75rem;
-    }
-    @media (min-width: 768px) { .truck-grid { grid-template-columns: repeat(3, 1fr); } }
-    .truck-option {
-        border: 2px solid var(--color-tire);
-        padding: 0.75rem 1rem;
-        text-align: center;
-        cursor: pointer;
-        font-weight: 700;
-        font-size: 0.875rem;
-        color: var(--color-tire);
-        background: var(--color-white);
-        transition: background 0.15s, color 0.15s;
-        user-select: none;
-    }
-    .truck-option:hover { background: var(--color-orange); color: var(--color-white); }
-    .truck-option--active { background: var(--color-tire); color: var(--color-white); }
-    .hidden-radio { display: none; }
-
-    /* ── Summary ── */
-    .calc-summary {
-        padding-top: 1.5rem;
-        border-top: 4px solid var(--color-tire);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 1.5rem;
-    }
-    @media (min-width: 768px) {
-        .calc-summary { flex-direction: row; justify-content: space-between; }
-    }
-    .summary-total { text-align: center; }
-    @media (min-width: 768px) { .summary-total { text-align: left; } }
-    .summary-label {
-        font-weight: 700;
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        color: var(--color-steel);
-        margin: 0 0 0.25rem;
-    }
-    .summary-price {
-        font-family: var(--font-heading);
-        font-weight: 900;
-        font-size: clamp(2rem, 5vw, 3rem);
-        color: var(--color-tire);
-        line-height: 1;
-    }
-    .summary-currency { font-size: 1.5rem; color: var(--color-orange); }
-
-    .btn-submit {
-        background: var(--color-orange);
-        color: var(--color-white);
-        border: none;
-        font-family: var(--font-heading);
-        font-weight: 900;
-        font-size: 1.25rem;
-        text-transform: uppercase;
-        padding: 1.25rem 2.5rem;
-        cursor: pointer;
-        box-shadow: var(--shadow-brutal);
-        transition: background 0.15s, transform 0.1s, box-shadow 0.1s;
-        width: 100%;
-    }
-    @media (min-width: 768px) { .btn-submit { width: auto; } }
-    .btn-submit:hover { background: var(--color-orange-hover); }
-    .btn-submit:active { transform: translate(3px, 3px); box-shadow: 2px 2px 0 var(--color-tire); }
-</style>
