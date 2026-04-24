@@ -3,7 +3,7 @@
 </script>
 
 <footer class="bg-tire text-steel py-12 border-t-4 border-orange text-center md:text-left">
-    <div class="max-w-[80rem] mx-auto px-4">
+    <div class="container-brutal">
         <div class="flex flex-col md:flex-row justify-between items-center gap-8">
             <!-- Branding -->
             <div class="branding">
@@ -18,8 +18,15 @@
 
             <!-- Contacts -->
             <div class="font-bold text-sm">
-                <p class="mb-1">м. Київ, вул. Будівельна, 10</p>
-                <p>Email: info@slomexpert.ua</p>
+                <p class="mb-1">
+                    <a href="https://www.google.com/maps/search/?api=1&query=Київ+вул+Будівельна+10" target="_blank" rel="noopener noreferrer" class="no-underline hover:text-orange">м. Київ, вул. Будівельна, 10</a>
+                </p>
+                <p class="mb-1">
+                    <a href="tel:+380672158888" class="no-underline hover:text-orange">+38 (067) 215-88-88</a>
+                </p>
+                <p>
+                    <a href="mailto:info@slomexpert.ua" class="no-underline hover:text-orange">info@slomexpert.ua</a>
+                </p>
             </div>
 
             <!-- Copyright -->

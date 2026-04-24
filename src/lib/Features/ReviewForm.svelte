@@ -3,6 +3,7 @@
     import Button from "$lib/shared/ui/Button.svelte";
     import Turnstile from "$lib/shared/ui/Turnstile.svelte";
     import Icon from "$lib/shared/ui/Icon.svelte";
+    import FeedbackMessage from "$lib/shared/ui/FeedbackMessage.svelte";
 
     let userName = $state("");
     let rating = $state(5);
@@ -15,6 +16,11 @@
 
     async function handleSubmit(e: Event) {
         e.preventDefault();
+
+        if (userName.trim().length < 2) {
+            feedback = { message: "Будь ласка, введіть ваше ім'я (мінімум 2 символи).", type: "error" };
+            return;
+        }
 
         if (!turnstileToken) {
             feedback = { message: "Будь ласка, підтвердіть, що ви не робот.", type: "error" };
@@ -58,7 +64,7 @@
 </script>
 
 <section id="reviews" class="py-16 bg-concrete border-t-4 border-tire">
-    <div class="max-w-3xl mx-auto px-4">
+    <div class="container-brutal-sm">
         <div class="card-brutal p-6 md:p-10">
             <div class="text-center mb-8">
                 <h2 class="font-heading font-black text-4xl uppercase mb-2">ЗАЛИШИТИ ВІДГУК</h2>
@@ -74,7 +80,15 @@
                 <div class="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-6">
                     <div class="flex flex-col gap-2">
                         <label for="rev-name" class="font-extrabold text-sm uppercase text-tire">Ваше ім'я</label>
-                        <Input id="rev-name" placeholder="Олександр Прораб" bind:value={userName} required disabled={isSubmitting} />
+                        <Input 
+                            id="rev-name" 
+                            placeholder="Олександр Прораб" 
+                            bind:value={userName} 
+                            required 
+                            minlength={2}
+                            maxlength={50}
+                            disabled={isSubmitting} 
+                        />
                     </div>
 
                     <div class="flex flex-col gap-2">
@@ -83,7 +97,7 @@
                             {#each [1, 2, 3, 4, 5] as star}
                                 <button 
                                     type="button" 
-                                    class="bg-transparent border-none text-3xl cursor-pointer transition-all duration-100 hover:scale-120 hover:text-orange {rating >= star ? 'text-orange' : 'text-steel'}" 
+                                    class="bg-transparent border-none text-3xl cursor-pointer transition-all duration-100 hover:scale-120 hover:text-orange focus-visible:outline-2 focus-visible:outline-orange focus-visible:outline-offset-4 {rating >= star ? 'text-orange' : 'text-steel'}" 
                                     onclick={() => rating = star}
                                     aria-label="Оцінити на {star} зірок"
                                     disabled={isSubmitting}
@@ -117,11 +131,7 @@
                     </Button>
                 </div>
 
-                {#if feedback.message}
-                    <div class="mt-6 p-4 font-bold border-3 text-center {feedback.type === 'success' ? 'bg-green-100 text-green-800 border-green-800' : 'bg-red-100 text-red-800 border-red-800'}">
-                        {feedback.message}
-                    </div>
-                {/if}
+                <FeedbackMessage message={feedback.message} type={feedback.type as "success" | "error"} />
             </form>
         </div>
     </div>

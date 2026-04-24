@@ -11,16 +11,20 @@ const rateLimits = new Map<string, { count: number, resetAt: number }>();
 const TURNSTILE_SECRET = TURNSTILE_SECRET_KEY || '1x0000000000000000000000000000000AA';
 
 // --- SCHEMAS ---
+const phoneSchema = z.string()
+    .transform(val => val.replace(/\D/g, '')) // Remove non-digits
+    .pipe(z.string().regex(/^(38)?0\d{9}$/, "Невірний формат номера (очікується 0XXXXXXXXX або 380XXXXXXXXX)"));
+
 const contactSchema = z.object({
     name: z.string().min(2).max(100),
-    phone: z.string().min(10).max(20),
+    phone: phoneSchema,
     message: z.string().max(1000).optional(),
     turnstileToken: z.string().optional()
 });
 
 const configuratorSchema = z.object({
     userName: z.string().min(2).max(100),
-    userPhone: z.string().min(10).max(20),
+    userPhone: phoneSchema,
     totalPrice: z.union([z.string(), z.number()]),
     details: z.array(z.object({
         label: z.string(),

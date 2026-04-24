@@ -27,6 +27,7 @@
             id="s{i + 1}" 
             checked={i === 0} 
             class="hidden"
+            aria-label="Слайд {i + 1}"
         >
     {/each}
 
@@ -39,6 +40,8 @@
                         src={slide.img} 
                         alt={slide.title} 
                         class="absolute inset-0 w-full h-full object-cover grayscale-[0.5] contrast-125"
+                        fetchpriority={slides.indexOf(slide) === 0 ? "high" : "auto"}
+                        loading={slides.indexOf(slide) === 0 ? "eager" : "lazy"}
                     />
                     <div class="absolute inset-0 bg-tire/40"></div>
                     <div class="relative z-10 text-center px-4">
@@ -70,11 +73,8 @@
 
 <style>
     /* CSS Logic for Switching - kept in style block because Tailwind peer/group logic is limited for nth-siblings */
-    #s1:checked ~ .carousel-viewport .carousel-track,
     #s1:checked ~ div .carousel-track { transform: translateX(0%); }
-    #s2:checked ~ .carousel-viewport .carousel-track,
     #s2:checked ~ div .carousel-track { transform: translateX(-100%); }
-    #s3:checked ~ .carousel-viewport .carousel-track,
     #s3:checked ~ div .carousel-track { transform: translateX(-200%); }
 
     #s1:checked ~ .arrows .s1-nav { display: flex; }

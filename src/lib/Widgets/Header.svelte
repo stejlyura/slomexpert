@@ -19,7 +19,7 @@
 <input type="checkbox" id="mobile-menu-toggle" class="peer hidden" />
 
 <header class="bg-white border-b-4 border-tire sticky top-0 z-[100] header">
-    <div class="max-w-[80rem] mx-auto px-4">
+    <div class="container-brutal">
         <div class="flex justify-between items-center h-20">
             <a href="/" class="flex items-center gap-2 no-underline text-tire">
                 <span class="text-4xl">🏗️</span>
@@ -44,7 +44,7 @@
                 </Button>
             </div>
 
-            <label for="mobile-menu-toggle" class="block md:hidden text-3xl cursor-pointer text-tire p-2">
+            <label for="mobile-menu-toggle" class="block md:hidden text-3xl cursor-pointer text-tire p-2" aria-label="Відкрити меню">
                 <Icon name="bars" className="peer-checked-hidden" />
                 <Icon name="xmark" className="hidden peer-checked-block" />
             </label>
@@ -68,12 +68,10 @@
 </nav>
 
 <style>
-    /* We still need a tiny bit of CSS for the icon toggle because peer-checked doesn't work deep inside sibling tree easily without specific setup */
-    #mobile-menu-toggle:checked ~ .header .peer-checked-hidden {
+    #mobile-menu-toggle:checked ~ .header :global(.peer-checked-hidden) {
         display: none;
     }
-    #mobile-menu-toggle:checked ~ .header .peer-checked-block {
+    #mobile-menu-toggle:checked ~ .header :global(.peer-checked-block) {
         display: block;
     }
 </style>
-

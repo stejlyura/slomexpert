@@ -2,6 +2,9 @@
     import Input from "$lib/shared/ui/Input.svelte";
     import Button from "$lib/shared/ui/Button.svelte";
     import Turnstile from "$lib/shared/ui/Turnstile.svelte";
+    import FeedbackMessage from "$lib/shared/ui/FeedbackMessage.svelte";
+
+    import { formatUkrainianPhone } from "$lib/shared/utils/phone";
 
     let {
         title = "Швидка оцінка об'єкта",
@@ -12,6 +15,11 @@
 
     let name = $state("");
     let phone = $state("");
+
+    function handlePhoneInput(e: Event) {
+        const input = e.target as HTMLInputElement;
+        phone = formatUkrainianPhone(input.value);
+    }
     let turnstileToken = $state("");
     let websiteUrl = $state(""); // Honeypot
     let isSubmitting = $state(false);
@@ -19,6 +27,10 @@
     let turnstileComponent: any = $state();
 
     async function handleSubmit() {
+        if (name.trim().length < 2) {
+            feedback = { message: "Будь ласка, введіть коректне ім'я (мінімум 2 символи).", type: "error" };
+            return;
+        }
         if (!turnstileToken) {
             feedback = { message: "Будь ласка, підтвердіть, що ви не робот.", type: "error" };
             return;
@@ -63,7 +75,7 @@
     <h2 class="font-heading font-black text-3xl md:text-4xl mb-2">{title}</h2>
     <p class="text-steel font-medium mb-8">{description}</p>
 
-    <form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }} class="flex flex-col md:flex-row md:items-stretch gap-4">
+    <form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }} class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[1fr_1fr_auto] items-stretch gap-4">
         <!-- Honeypot field -->
         <div class="absolute -left-[9999px] -top-[9999px] opacity-0 pointer-events-none" aria-hidden="true">
             <input type="text" name="website_url" bind:value={websiteUrl} tabindex="-1" autocomplete="off" />
@@ -72,19 +84,22 @@
             bind:value={name} 
             placeholder="Ваше ім'я" 
             required 
+            minlength={2}
+            maxlength={50}
             disabled={isSubmitting}
-            className="flex-1"
         />
         <Input 
-            bind:value={phone} 
+            value={phone} 
             type="tel" 
             placeholder="+38 (0__) ___-__-__" 
             required 
             disabled={isSubmitting}
-            className="flex-1"
+            pattern="^\+38\s\(0\d{2}\)\s\d{3}-\d{2}-\d{2}$"
+            inputmode="tel"
+            oninput={handlePhoneInput}
         />
         
-        <div class="flex flex-col gap-2 min-w-[300px]">
+        <div class="flex flex-col gap-2 min-w-[300px] md:col-span-2 lg:col-span-1">
             <Turnstile 
                 bind:this={turnstileComponent}
                 onVerify={(token) => turnstileToken = token} 
@@ -95,11 +110,5 @@
         </div>
     </form>
 
-    {#if feedback.message}
-        <div 
-            class="mt-6 p-4 font-bold border-3 {feedback.type === 'success' ? 'bg-green-100 text-green-800 border-green-800' : 'bg-red-100 text-red-800 border-red-800'}"
-        >
-            {feedback.message}
-        </div>
-    {/if}
+    <FeedbackMessage message={feedback.message} type={feedback.type as "success" | "error"} />
 </div>

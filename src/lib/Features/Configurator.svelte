@@ -1,9 +1,13 @@
 <script lang="ts">
     import Input from "$lib/shared/ui/Input.svelte";
     import Select from "$lib/shared/ui/Select.svelte";
-    import Checkbox from "$lib/shared/ui/Checkbox.svelte";
     import Turnstile from "$lib/shared/ui/Turnstile.svelte";
     import Icon from "$lib/shared/ui/Icon.svelte";
+    import FeedbackMessage from "$lib/shared/ui/FeedbackMessage.svelte";
+
+    import ServiceBlock from "./Configurator/ServiceBlock.svelte";
+    import TruckSelector from "./Configurator/TruckSelector.svelte";
+    import PriceSummary from "./Configurator/PriceSummary.svelte";
 
     interface ServiceOption { value: number; label: string; }
     interface BaseRow { id: string; price: number; qty: number; }
@@ -41,6 +45,8 @@
         { value: 17500, label: "В цеглі (2100x900, кутники по периметру) - 17500 ₴" },
     ];
 
+    import { formatUkrainianPhone } from "$lib/shared/utils/phone";
+
     let demolitions: BaseRow[]    = $state([{ id: uid(), price: 0, qty: 0 }]);
     let cuttings: BaseRow[]       = $state([{ id: uid(), price: 0, qty: 0 }]);
     let drillings: DrillingRow[]  = $state([{ id: uid(), price: 0, depth: 0, qty: 0 }]);
@@ -49,6 +55,11 @@
     let truckPrice: number = $state(0);
     let userName: string = $state("");
     let userPhone: string = $state("");
+
+    function handlePhoneInput(e: Event) {
+        const input = e.target as HTMLInputElement;
+        userPhone = formatUkrainianPhone(input.value);
+    }
     let turnstileToken: string = $state("");
     let websiteUrl: string = $state(""); // Honeypot
     let turnstileComponent: any = $state();
@@ -74,6 +85,11 @@
 
     async function handleSubmit(e: Event) {
         e.preventDefault();
+
+        if (userName.trim().length < 2) {
+            feedback = { message: "Будь ласка, введіть коректне ім'я (мінімум 2 символи).", type: "error" };
+            return;
+        }
 
         if (!turnstileToken) {
             feedback = { message: "Будь ласка, підтвердіть, що ви не робот.", type: "error" };
@@ -154,12 +170,16 @@
             </div>
 
             <!-- 1. Демонтаж -->
-            <div class="p-6 bg-concrete border-4 border-tire">
-                <h3 class="font-heading font-bold text-xl mb-4 flex items-center gap-2 text-tire">
-                    <Icon name="hammer" className="text-orange" /> Основний демонтаж
-                </h3>
-                {#each demolitions as item, i (item.id)}
-                    <div class="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4 items-end {i > 0 ? 'pt-6 mt-6 border-t-2 border-dashed border-tire/20' : ''}">
+            <ServiceBlock 
+                title="Основний демонтаж" 
+                icon="hammer" 
+                items={demolitions} 
+                addButtonText="Додати ще демонтаж" 
+                isSubmitting={isSubmitting}
+                onAdd={() => demolitions = addRow(demolitions, { price:0, qty:0 })}
+            >
+                {#snippet children(item)}
+                    <div class="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4 items-end">
                         <div class="flex flex-col w-full">
                             <label class="font-bold text-sm mb-2 text-tire" for="dem-type-{item.id}">Вид робіт</label>
                             <Select 
@@ -187,19 +207,20 @@
                             </button>
                         {/if}
                     </div>
-                {/each}
-                <button type="button" class="mt-6 inline-flex items-center gap-2 font-sans font-bold text-sm uppercase text-orange bg-transparent border-none border-b-2 border-dashed border-orange pb-0.5 cursor-pointer transition-colors duration-150 hover:text-orange-hover" onclick={() => demolitions = addRow(demolitions, { price:0, qty:0 })} disabled={isSubmitting}>
-                    <Icon name="plus" /> Додати ще демонтаж
-                </button>
-            </div>
+                {/snippet}
+            </ServiceBlock>
 
             <!-- 2. Різання -->
-            <div class="p-6 bg-concrete border-4 border-tire">
-                <h3 class="font-heading font-bold text-xl mb-4 flex items-center gap-2 text-tire">
-                    <Icon name="burst" className="text-orange" /> Алмазне різання
-                </h3>
-                {#each cuttings as item, i (item.id)}
-                    <div class="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4 items-end {i > 0 ? 'pt-6 mt-6 border-t-2 border-dashed border-tire/20' : ''}">
+            <ServiceBlock 
+                title="Алмазне різання" 
+                icon="burst" 
+                items={cuttings} 
+                addButtonText="Додати ще різку" 
+                isSubmitting={isSubmitting}
+                onAdd={() => cuttings = addRow(cuttings, { price:0, qty:0 })}
+            >
+                {#snippet children(item)}
+                    <div class="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4 items-end">
                         <div class="flex flex-col w-full">
                             <label class="font-bold text-sm mb-2 text-tire" for="cut-type-{item.id}">Тип матеріалу</label>
                             <Select 
@@ -227,21 +248,22 @@
                             </button>
                         {/if}
                     </div>
-                {/each}
-                <button type="button" class="mt-6 inline-flex items-center gap-2 font-sans font-bold text-sm uppercase text-orange bg-transparent border-none border-b-2 border-dashed border-orange pb-0.5 cursor-pointer transition-colors duration-150 hover:text-orange-hover" onclick={() => cuttings = addRow(cuttings, { price:0, qty:0 })} disabled={isSubmitting}>
-                    <Icon name="plus" /> Додати ще різку
-                </button>
-            </div>
+                {/snippet}
+            </ServiceBlock>
 
             <!-- 3. Свердління + Підсилення -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Свердління -->
-                <div class="p-6 bg-concrete border-4 border-tire">
-                    <h3 class="font-heading font-bold text-lg mb-4 flex items-center gap-2 text-tire">
-                        <Icon name="circle-dot" className="text-orange" /> Алмазне свердління
-                    </h3>
-                    {#each drillings as item, i (item.id)}
-                        <div class="flex flex-col gap-4 {i > 0 ? 'pt-6 mt-6 border-t-2 border-dashed border-tire/20' : ''}">
+                <ServiceBlock 
+                    title="Алмазне свердління" 
+                    icon="circle-dot" 
+                    items={drillings} 
+                    addButtonText="Додати ще отвори" 
+                    isSubmitting={isSubmitting}
+                    onAdd={() => drillings = addRow(drillings, { price:0, depth:0, qty:0 })}
+                >
+                    {#snippet children(item)}
+                        <div class="flex flex-col gap-4">
                             <div class="flex flex-col w-full">
                                 <label class="font-bold text-sm mb-2 text-tire" for="dr-type-{item.id}">Діаметр коронки</label>
                                 <Select 
@@ -282,19 +304,20 @@
                                 {/if}
                             </div>
                         </div>
-                    {/each}
-                    <button type="button" class="mt-6 inline-flex items-center gap-2 font-sans font-bold text-sm uppercase text-orange bg-transparent border-none border-b-2 border-dashed border-orange pb-0.5 cursor-pointer transition-colors duration-150 hover:text-orange-hover" onclick={() => drillings = addRow(drillings, { price:0, depth:0, qty:0 })} disabled={isSubmitting}>
-                        <Icon name="plus" /> Додати ще отвори
-                    </button>
-                </div>
+                    {/snippet}
+                </ServiceBlock>
 
                 <!-- Підсилення -->
-                <div class="p-6 bg-concrete border-4 border-tire">
-                    <h3 class="font-heading font-bold text-lg mb-4 flex items-center gap-2 text-tire">
-                        <Icon name="door-open" className="text-orange" /> Підсилення пройомів
-                    </h3>
-                    {#each reinforcements as item, i (item.id)}
-                        <div class="flex flex-col gap-4 {i > 0 ? 'pt-6 mt-6 border-t-2 border-dashed border-tire/20' : ''}">
+                <ServiceBlock 
+                    title="Підсилення пройомів" 
+                    icon="door-open" 
+                    items={reinforcements} 
+                    addButtonText="Додати ще підсилення" 
+                    isSubmitting={isSubmitting}
+                    onAdd={() => reinforcements = addRow(reinforcements, { price:0, qty:0 })}
+                >
+                    {#snippet children(item)}
+                        <div class="flex flex-col gap-4">
                             <div class="flex flex-col w-full">
                                 <label class="font-bold text-sm mb-2 text-tire" for="re-type-{item.id}">Конструкція підсилення</label>
                                 <Select 
@@ -324,57 +347,12 @@
                                 {/if}
                             </div>
                         </div>
-                    {/each}
-                    <button type="button" class="mt-6 inline-flex items-center gap-2 font-sans font-bold text-sm uppercase text-orange bg-transparent border-none border-b-2 border-dashed border-orange pb-0.5 cursor-pointer transition-colors duration-150 hover:text-orange-hover" onclick={() => reinforcements = addRow(reinforcements, { price:0, qty:0 })} disabled={isSubmitting}>
-                        <Icon name="plus" /> Додати ще підсилення
-                    </button>
-                </div>
+                    {/snippet}
+                </ServiceBlock>
             </div>
 
             <!-- 4. Вивіз сміття -->
-            <div class="p-6 bg-white border-4 border-orange">
-                <h3 class="font-heading font-bold text-xl mb-4 flex items-center gap-2 text-tire">
-                    <Icon name="truck-fast" className="text-orange" /> Вивезення сміття
-                </h3>
-                <div class="flex justify-between items-center bg-concrete border-2 border-tire p-3 mb-4 transition-colors duration-200 cursor-default hover:border-orange">
-                    <span class="font-bold text-[0.9rem] text-tire">Фасування в мішки (100 ₴ / шт)</span>
-                    <Input
-                        id="trashBags"
-                        type="number"
-                        min="0"
-                        className="!w-24 !p-1 !px-2 !border-2"
-                        placeholder="0 шт"
-                        bind:value={trashBags}
-                        disabled={isSubmitting}
-                    />
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <Checkbox 
-                        type="radio" 
-                        name="truck" 
-                        value={0} 
-                        bind:group={truckPrice} 
-                        label="Без машини" 
-                        disabled={isSubmitting} 
-                    />
-                    <Checkbox 
-                        type="radio" 
-                        name="truck" 
-                        value={2500} 
-                        bind:group={truckPrice} 
-                        label="ЗІЛ 5т (+2500 ₴)" 
-                        disabled={isSubmitting} 
-                    />
-                    <Checkbox 
-                        type="radio" 
-                        name="truck" 
-                        value={4500} 
-                        bind:group={truckPrice} 
-                        label="КАМАЗ 10т (+4500 ₴)" 
-                        disabled={isSubmitting} 
-                    />
-                </div>
-            </div>
+            <TruckSelector bind:trashBags bind:truckPrice {isSubmitting} />
 
             <!-- Ваші контакти -->
             <div class="p-6 bg-concrete border-4 border-tire">
@@ -384,40 +362,42 @@
                 <div class="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4 items-end">
                     <div class="flex flex-col w-full">
                         <label class="font-bold text-sm mb-2 text-tire" for="user-name">Ваше ім'я</label>
-                        <Input id="user-name" placeholder="Олександр" bind:value={userName} required disabled={isSubmitting} />
+                        <Input 
+                            id="user-name" 
+                            placeholder="Олександр" 
+                            bind:value={userName} 
+                            required 
+                            minlength={2}
+                            maxlength={50}
+                            disabled={isSubmitting} 
+                        />
                     </div>
                     <div class="flex flex-col w-full">
                         <label class="font-bold text-sm mb-2 text-tire" for="user-phone">Номер телефону</label>
-                        <Input id="user-phone" type="tel" placeholder="+38 (0XX) XXX-XX-XX" bind:value={userPhone} required disabled={isSubmitting} />
+                        <Input 
+                            id="user-phone" 
+                            type="tel" 
+                            placeholder="+38 (0XX) XXX-XX-XX" 
+                            bind:value={userPhone}
+                            required 
+                            disabled={isSubmitting} 
+                            pattern="^\+38\s\(0\d{2}\)\s\d{3}-\d{2}-\d{2}$"
+                            inputmode="tel"
+                            oninput={handlePhoneInput}
+                        />
                     </div>
                 </div>
             </div>
 
             <!-- Підсумок -->
-            <div class="pt-6 border-t-4 border-tire flex flex-col md:flex-row md:justify-between items-center gap-6">
-                <div class="text-center md:text-left">
-                    <p class="font-bold text-[0.75rem] uppercase text-steel mb-1">Загальна сума згідно з прайсом:</p>
-                    <div class="font-heading font-black text-4xl md:text-5xl text-tire leading-none">
-                        <span id="totalPrice">{formattedTotal}</span>
-                        <span class="text-2xl text-orange">₴</span>
-                    </div>
-                </div>
-                <div class="flex flex-col items-center md:items-end gap-2">
-                    <Turnstile 
-                        bind:this={turnstileComponent}
-                        onVerify={(token) => turnstileToken = token} 
-                    />
-                    <button type="submit" class="bg-orange text-white border-none font-heading font-black text-xl uppercase p-5 px-10 cursor-pointer shadow-brutal transition-all duration-150 hover:bg-orange-hover active:translate-x-[3px] active:translate-y-[3px] active:shadow-[2px_2px_0_#16181A] w-full md:w-auto" disabled={isSubmitting}>
-                        {isSubmitting ? "ВІДПРАВКА..." : "ЗАФІКСУВАТИ ЦІНУ"}
-                    </button>
-                </div>
-            </div>
+            <PriceSummary 
+                formattedTotal={formattedTotal} 
+                isSubmitting={isSubmitting} 
+                bind:turnstileComponent 
+                onVerify={(token) => turnstileToken = token} 
+            />
 
-            {#if feedback.message}
-                <div class="mt-6 p-4 font-bold border-4 text-center {feedback.type === 'success' ? 'bg-green-100 text-green-800 border-green-800' : 'bg-red-100 text-red-800 border-red-800'}">
-                    {feedback.message}
-                </div>
-            {/if}
+            <FeedbackMessage message={feedback.message} type={feedback.type as "success" | "error"} />
         </form>
     </div>
 </section>

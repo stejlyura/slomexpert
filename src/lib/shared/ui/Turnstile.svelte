@@ -1,8 +1,10 @@
 <script>
     import { onMount } from 'svelte';
 
+    import { PUBLIC_TURNSTILE_SITE_KEY } from '$env/static/public';
+    
     let { 
-        sitekey = "1x00000000000000000000AA", // Testing key (Always passes)
+        sitekey = PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA", 
         onVerify = (token) => {},
         theme = "light"
     } = $props();
