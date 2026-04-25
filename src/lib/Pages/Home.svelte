@@ -1,17 +1,31 @@
 <script>
+    import { onMount } from "svelte";
     import Header from "../Widgets/Header.svelte";
     import Footer from "../Widgets/Footer.svelte";
     import HeroCarousel from "../Features/HeroCarousel.svelte";
     import ContactForm from "../Features/ContactForm.svelte";
     import StatCard from "../Entities/StatCard.svelte";
     import ComparisonItem from "../Entities/ComparisonItem.svelte";
-    import ServiceCard from "../Entities/ServiceCard.svelte";
-    import Configurator from "../Features/Configurator.svelte";
     import StepCard from "../Entities/StepCard.svelte";
-    import MessengerBlock from "../Features/MessengerBlock.svelte";
-    import ReviewForm from "../Features/ReviewForm.svelte";
+    import Services from "../Widgets/Services.svelte";
     import SEO from "../shared/seo/SEO.svelte";
     import Icon from "../shared/ui/Icon.svelte";
+
+    let Configurator = $state(null);
+    let MessengerBlock = $state(null);
+    let ReviewForm = $state(null);
+
+    onMount(async () => {
+        const [configMod, messengerMod, reviewMod] = await Promise.all([
+            import("../Features/Configurator.svelte"),
+            import("../Features/MessengerBlock.svelte"),
+            import("../Features/ReviewForm.svelte")
+        ]);
+        
+        Configurator = configMod.default;
+        MessengerBlock = messengerMod.default;
+        ReviewForm = reviewMod.default;
+    });
 
     const jsonLd = {
         "@context": "https://schema.org",
@@ -48,30 +62,6 @@
             closes: "23:59",
         },
     };
-
-    const services = [
-        {
-            icon: "🏭",
-            title: "Промислові об'єкти",
-            description:
-                "Ангари, заводи, цехи. Тяжка техніка та різання металоконструкцій.",
-            variant: "white",
-        },
-        {
-            icon: "🏠",
-            title: "Приватні будинки",
-            description:
-                "Акуратне знесення старих будинків, дач, сараїв зі збереженням матеріалів.",
-            variant: "orange",
-        },
-        {
-            icon: "🚪",
-            title: "Квартирний демонтаж",
-            description:
-                "Стяжка, перегородки, плитка. Працюємо тихо (наскільки це можливо).",
-            variant: "white",
-        },
-    ];
 
     const stats = [
         { value: "> 10", label: "Років на ринку" },
@@ -246,23 +236,7 @@
         </section>
 
         <!-- 6. Services Section -->
-        <section
-            id="services"
-            class="py-16 md:py-24 bg-white border-y-4 border-tire content-auto"
-        >
-            <div class="container-brutal">
-                <h2
-                    class="font-heading font-black text-4xl mb-12 uppercase text-center"
-                >
-                    ЩО МИ ДЕМОНТУЄМО?
-                </h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {#each services as service}
-                        <ServiceCard {...service} />
-                    {/each}
-                </div>
-            </div>
-        </section>
+        <Services />
 
         <!-- 7. Calculator Section -->
         <section
@@ -270,7 +244,14 @@
             class="py-16 md:py-24 bg-tire relative overflow-hidden before:content-[''] before:absolute before:inset-0 before:[background:repeating-linear-gradient(45deg,var(--color-orange),var(--color-orange)_40px,var(--color-tire)_40px,var(--color-tire)_80px)] before:opacity-10"
         >
             <div class="container-brutal-sm relative z-10">
-                <Configurator />
+                {#if Configurator}
+                    <Configurator />
+                {:else}
+                    <div class="min-h-[400px] flex flex-col items-center justify-center text-white bg-tire/80 backdrop-blur-sm border-2 border-orange/20">
+                        <div class="w-12 h-12 border-4 border-orange border-t-transparent rounded-full animate-spin mb-4"></div>
+                        <p class="font-heading font-bold uppercase tracking-widest">Завантаження калькулятора...</p>
+                    </div>
+                {/if}
             </div>
         </section>
 
@@ -292,7 +273,7 @@
             </div>
         </section>
 
-        <!-- 9. Final Contact Section -->
+        <!-- 10. Final Contact Section -->
         <section class="py-16 md:py-24 bg-orange border-b-8 border-tire">
             <div
                 class="container-brutal flex flex-col md:flex-row items-center gap-12"
@@ -306,7 +287,15 @@
                     <p class="font-bold text-xl mb-8">
                         Пишіть нам туди, де вам зручно. Ми завжди онлайн.
                     </p>
-                    <MessengerBlock />
+                    {#if MessengerBlock}
+                        <MessengerBlock />
+                    {:else}
+                        <div class="flex gap-4">
+                            <div class="w-12 h-12 bg-white/20 animate-pulse border-2 border-tire"></div>
+                            <div class="w-12 h-12 bg-white/20 animate-pulse border-2 border-tire"></div>
+                            <div class="w-12 h-12 bg-white/20 animate-pulse border-2 border-tire"></div>
+                        </div>
+                    {/if}
                 </div>
                 <div class="flex-1 w-full">
                     <ContactForm

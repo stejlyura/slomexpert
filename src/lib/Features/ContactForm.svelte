@@ -1,7 +1,6 @@
 <script lang="ts">
     import Input from "$lib/shared/ui/Input.svelte";
     import Button from "$lib/shared/ui/Button.svelte";
-    import Turnstile from "$lib/shared/ui/Turnstile.svelte";
     import FeedbackMessage from "$lib/shared/ui/FeedbackMessage.svelte";
 
     import { formatUkrainianPhone } from "$lib/shared/utils/phone";
@@ -20,19 +19,21 @@
         const input = e.target as HTMLInputElement;
         phone = formatUkrainianPhone(input.value);
     }
-    let turnstileToken = $state("");
+    
     let websiteUrl = $state(""); // Honeypot
     let isSubmitting = $state(false);
     let feedback = $state({ message: "", type: "" });
-    let turnstileComponent: any = $state();
 
     async function handleSubmit() {
+        // Validation
         if (name.trim().length < 2) {
             feedback = { message: "Будь ласка, введіть коректне ім'я (мінімум 2 символи).", type: "error" };
             return;
         }
-        if (!turnstileToken) {
-            feedback = { message: "Будь ласка, підтвердіть, що ви не робот.", type: "error" };
+
+        const phoneDigits = phone.replace(/\D/g, '');
+        if (phoneDigits.length < 12) {
+            feedback = { message: "Будь ласка, введіть повний номер телефону.", type: "error" };
             return;
         }
 
@@ -46,7 +47,7 @@
                 body: JSON.stringify({
                     type: 'contact',
                     website_url: websiteUrl,
-                    data: { name, phone, turnstileToken }
+                    data: { name, phone }
                 })
             });
 
@@ -57,11 +58,8 @@
                 name = "";
                 phone = "";
                 websiteUrl = "";
-                turnstileToken = "";
-                turnstileComponent?.reset();
             } else {
                 feedback = { message: result.error || "Помилка відправки. Спробуйте пізніше.", type: "error" };
-                turnstileComponent?.reset();
             }
         } catch (err) {
             feedback = { message: "Сервер недоступний. Перевірте з'єднання.", type: "error" };
@@ -89,21 +87,16 @@
             disabled={isSubmitting}
         />
         <Input 
-            value={phone} 
+            bind:value={phone} 
             type="tel" 
             placeholder="+38 (0__) ___-__-__" 
             required 
             disabled={isSubmitting}
-            pattern="^\+38\s\(0\d{2}\)\s\d{3}-\d{2}-\d{2}$"
             inputmode="tel"
             oninput={handlePhoneInput}
         />
         
         <div class="flex flex-col gap-2 min-w-[300px] md:col-span-2 lg:col-span-1">
-            <Turnstile 
-                bind:this={turnstileComponent}
-                onVerify={(token) => turnstileToken = token} 
-            />
             <Button type="submit" variant="orange" className="px-8 py-4 text-lg w-full" disabled={isSubmitting}>
                 {isSubmitting ? "ВІДПРАВКА..." : buttonText}
             </Button>

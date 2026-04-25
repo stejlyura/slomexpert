@@ -1,7 +1,6 @@
 <script lang="ts">
     import Input from "$lib/shared/ui/Input.svelte";
     import Select from "$lib/shared/ui/Select.svelte";
-    import Turnstile from "$lib/shared/ui/Turnstile.svelte";
     import Icon from "$lib/shared/ui/Icon.svelte";
     import FeedbackMessage from "$lib/shared/ui/FeedbackMessage.svelte";
 
@@ -60,9 +59,7 @@
         const input = e.target as HTMLInputElement;
         userPhone = formatUkrainianPhone(input.value);
     }
-    let turnstileToken: string = $state("");
     let websiteUrl: string = $state(""); // Honeypot
-    let turnstileComponent: any = $state();
 
     function addRow<T extends { id: string }>(arr: T[], fields: Omit<T, "id">): T[] {
         return [...arr, { id: uid(), ...fields } as T];
@@ -86,13 +83,15 @@
     async function handleSubmit(e: Event) {
         e.preventDefault();
 
+        // Validation
         if (userName.trim().length < 2) {
             feedback = { message: "Будь ласка, введіть коректне ім'я (мінімум 2 символи).", type: "error" };
             return;
         }
 
-        if (!turnstileToken) {
-            feedback = { message: "Будь ласка, підтвердіть, що ви не робот.", type: "error" };
+        const phoneDigits = userPhone.replace(/\D/g, '');
+        if (phoneDigits.length < 12) {
+            feedback = { message: "Будь ласка, введіть повний номер телефону.", type: "error" };
             return;
         }
 
@@ -126,8 +125,7 @@
                         userName,
                         userPhone,
                         totalPrice: formattedTotal,
-                        details,
-                        turnstileToken
+                        details
                     }
                 })
             });
@@ -140,11 +138,8 @@
                 userName = "";
                 userPhone = "";
                 websiteUrl = "";
-                turnstileToken = "";
-                turnstileComponent?.reset();
             } else {
                 feedback = { message: result.error || "Помилка відправки. Спробуйте пізніше.", type: "error" };
-                turnstileComponent?.reset();
             }
         } catch (err) {
             feedback = { message: "Сервер недоступний. Перевірте мережу.", type: "error" };
@@ -381,7 +376,6 @@
                             bind:value={userPhone}
                             required 
                             disabled={isSubmitting} 
-                            pattern="^\+38\s\(0\d{2}\)\s\d{3}-\d{2}-\d{2}$"
                             inputmode="tel"
                             oninput={handlePhoneInput}
                         />
@@ -393,8 +387,6 @@
             <PriceSummary 
                 formattedTotal={formattedTotal} 
                 isSubmitting={isSubmitting} 
-                bind:turnstileComponent 
-                onVerify={(token) => turnstileToken = token} 
             />
 
             <FeedbackMessage message={feedback.message} type={feedback.type as "success" | "error"} />

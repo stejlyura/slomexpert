@@ -4,15 +4,15 @@
         slides = [
             {
                 title: "Знесення будівель",
-                img: "/images/hero-1.png"
+                img: "/images/hero-1.webp"
             },
             {
                 title: "Механізований демонтаж",
-                img: "/images/hero-2.png"
+                img: "/images/hero-2.webp"
             },
             {
                 title: "Ручний демонтаж квартир",
-                img: "/images/hero-3.png"
+                img: "/images/hero-3.webp"
             }
         ]
     } = $props();
@@ -42,6 +42,8 @@
                         class="absolute inset-0 w-full h-full object-cover grayscale-[0.5] contrast-125"
                         fetchpriority={slides.indexOf(slide) === 0 ? "high" : "auto"}
                         loading={slides.indexOf(slide) === 0 ? "eager" : "lazy"}
+                        width="896"
+                        height="450"
                     />
                     <div class="absolute inset-0 bg-tire/40"></div>
                     <div class="relative z-10 text-center px-4">
