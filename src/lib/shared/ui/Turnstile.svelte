@@ -13,6 +13,15 @@
     let widgetId;
 
     onMount(() => {
+        // Load Turnstile script dynamically if not present
+        if (!window.turnstile && !document.querySelector('script[src*="turnstile/v0/api.js"]')) {
+            const script = document.createElement('script');
+            script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+            script.async = true;
+            script.defer = true;
+            document.head.appendChild(script);
+        }
+
         const checkTurnstile = setInterval(() => {
             if (window.turnstile) {
                 clearInterval(checkTurnstile);

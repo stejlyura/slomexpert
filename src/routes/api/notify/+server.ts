@@ -79,11 +79,6 @@ export const POST: RequestHandler = async ({ request, cookies, getClientAddress 
             return json({ success: true, note: 'Spam filtered' });
         }
 
-        // 2. Turnstile Verification
-        const isVerified = await verifyTurnstile(data.turnstileToken);
-        if (!isVerified) {
-            return json({ success: false, error: 'Помилка перевірки безпеки. Спробуйте ще раз.' }, { status: 403 });
-        }
 
         // 3. IP-based Rate limiting (max 5 submissions per 24h across all types)
         const now = Date.now();

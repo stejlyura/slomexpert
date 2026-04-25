@@ -1,29 +1,21 @@
 <script lang="ts">
     import Input from "$lib/shared/ui/Input.svelte";
     import Button from "$lib/shared/ui/Button.svelte";
-    import Turnstile from "$lib/shared/ui/Turnstile.svelte";
     import Icon from "$lib/shared/ui/Icon.svelte";
     import FeedbackMessage from "$lib/shared/ui/FeedbackMessage.svelte";
 
     let userName = $state("");
     let rating = $state(5);
     let comment = $state("");
-    let turnstileToken = $state("");
     let websiteUrl = $state(""); // Honeypot
     let isSubmitting = $state(false);
     let feedback = $state({ message: "", type: "" });
-    let turnstileComponent: any = $state();
 
     async function handleSubmit(e: Event) {
         e.preventDefault();
 
         if (userName.trim().length < 2) {
             feedback = { message: "Будь ласка, введіть ваше ім'я (мінімум 2 символи).", type: "error" };
-            return;
-        }
-
-        if (!turnstileToken) {
-            feedback = { message: "Будь ласка, підтвердіть, що ви не робот.", type: "error" };
             return;
         }
 
@@ -37,7 +29,7 @@
                 body: JSON.stringify({
                     type: 'review',
                     website_url: websiteUrl,
-                    data: { name: userName, rating, comment, turnstileToken }
+                    data: { name: userName, rating, comment }
                 })
             });
 
@@ -49,11 +41,8 @@
                 rating = 5;
                 comment = "";
                 websiteUrl = "";
-                turnstileToken = "";
-                turnstileComponent?.reset();
             } else {
                 feedback = { message: result.error || "Помилка відправки. Спробуйте пізніше.", type: "error" };
-                turnstileComponent?.reset();
             }
         } catch (err) {
             feedback = { message: "Сервер недоступний. Перевірте з'єднання.", type: "error" };
@@ -115,6 +104,7 @@
                         id="rev-comment" 
                         class="w-full min-h-[120px] bg-white border-3 border-tire p-4 font-sans font-semibold outline-none transition-all duration-200 focus:border-orange focus:shadow-brutal-sm" 
                         placeholder="Все розвалили дуже швидко, сміття вивезли. Рекомендую!" 
+                        aria-label="Ваш коментар"
                         bind:value={comment} 
                         required
                         disabled={isSubmitting}
@@ -122,10 +112,6 @@
                 </div>
 
                 <div class="mt-8 flex flex-col items-center gap-4">
-                    <Turnstile 
-                        bind:this={turnstileComponent}
-                        onVerify={(token) => turnstileToken = token} 
-                    />
                     <Button type="submit" variant="tire" className="w-full py-5 text-xl" disabled={isSubmitting}>
                         {isSubmitting ? "ВІДПРАВКА..." : "ОПУБЛІКУВАТИ ВІДГУК"}
                     </Button>

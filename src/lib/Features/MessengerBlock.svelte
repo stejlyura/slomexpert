@@ -17,6 +17,7 @@
                 href={messenger.href} 
                 class="w-16 h-16 bg-white border-3 border-tire flex items-center justify-center text-3xl transition-all duration-100 hover:bg-concrete hover:-translate-x-0.5 hover:-translate-y-0.5 shadow-brutal-sm" 
                 title={messenger.name}
+                aria-label="Написати у {messenger.name}"
                 target="_blank"
                 rel="noopener noreferrer"
                 style="color: {messenger.color}"
@@ -26,12 +27,11 @@
         {/each}
     </div>
 
-
     <a 
         href="tel:+380672158888" 
         class="font-heading font-black text-3xl md:text-4xl bg-tire text-white p-3 px-6 border-4 border-tire inline-block w-fit shadow-brutal-sm no-underline hover:bg-orange transition-colors duration-100"
+        aria-label="Подзвонити нам: {phoneNumber}"
     >
         {phoneNumber}
     </a>
 </div>
-
